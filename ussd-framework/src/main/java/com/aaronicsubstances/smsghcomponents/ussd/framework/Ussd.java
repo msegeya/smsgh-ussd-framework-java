@@ -2,18 +2,65 @@ package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
 import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.LoggingStore;
 import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.SessionStore;
+import com.google.gson.Gson;
 import java.io.*;
-import java.net.*;
 import java.util.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
 public class Ussd {
 
-    public static UssdResponse process(SessionStore store, UssdRequest request,
+    public static boolean process(
+            HttpServletRequest request, HttpServletResponse response,
+            SessionStore store,
             String initiationController, String initiationAction,
             Map<String, String> data, LoggingStore loggingStore,
-            String arbitraryLogData) {
-        return processRequest(store, request, initiationController,
-                initiationAction, data, loggingStore, arbitraryLogData, false);
+            String arbitraryLogData) throws ServletException, IOException {
+        
+        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+            // These CORS headers are necessary for Ussd Simulator at
+            // http://apps.smsgh.com/UssdSimulator/ to work with
+            // a Ussd app under test.
+            response.setHeader("Access-Control-Allow-Origin",
+                    "http://apps.smsgh.com");
+            response.setHeader("Access-Control-Allow-Methods",
+                    "POST, OPTIONS");
+            response.setHeader("Access-Control-Max-Age",
+                    "1");
+            String accessControlRequestHeaders = request.getHeader(
+                    "Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.setHeader("Access-Control-Allow-Headers",
+                        accessControlRequestHeaders);
+            }
+            return true;
+        }
+        if (!request.getMethod().equalsIgnoreCase("POST")) {
+            return false;
+        }
+        String ussdRequestJson = IOUtils.toString(request.getInputStream(),
+                "utf-8");
+        Gson gson = new Gson();
+        UssdRequest ussdRequest = gson.fromJson(ussdRequestJson, 
+                UssdRequest.class);
+        UssdResponse ussdResponse = processRequest(store, ussdRequest, 
+                initiationController, initiationAction, data, loggingStore, 
+                arbitraryLogData, false);
+        String ussdResponseJson = gson.toJson(ussdResponse);
+        byte [] ussdResponseJsonBytes = ussdResponseJson.getBytes("UTF-8");
+        
+        // This CORS header is necessary for Ussd Simulator at
+        // http://apps.smsgh.com/UssdSimulator/ to work with
+        // a Ussd app under test.
+        response.setHeader("Access-Control-Allow-Origin",
+                "http://apps.smsgh.com");
+        
+        response.setContentType("application/json;charset=utf-8");
+        response.setContentLength(ussdResponseJsonBytes.length);
+        response.getOutputStream().write(ussdResponseJsonBytes);
+        return true;
     }
 
     public static UssdResponse processRequest(SessionStore store, UssdRequest request,

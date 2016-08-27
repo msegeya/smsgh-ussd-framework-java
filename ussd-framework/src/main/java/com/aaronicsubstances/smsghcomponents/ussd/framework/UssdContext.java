@@ -50,20 +50,27 @@ public class UssdContext {
 
     public UssdResponse sessionExecuteAction() {
         String route = store.getValue(getNextRouteKey());
-        String[] routeArray = StringUtils.split(route, '.');
-        if (routeArray.length != 2) {
+        int periodIndex = route.lastIndexOf('.');
+        if (periodIndex == -1) {
             throw new RuntimeException("Invalid route format. "
-                    + "Must be `SomeController.Action`." +
+                    + "Must be \"SomeController.Action\"." +
                 "Current route is " + route);
         }
-        String controllerName = routeArray[0];
-        String actionName = routeArray[1];
+        String controllerName = route.substring(0, periodIndex);
+        String actionName = route.substring(periodIndex+1);
         Class controllerClass;
         try {
             controllerClass = Class.forName(controllerName);
         }
         catch (ClassNotFoundException ex) {
-            throw new RuntimeException(controllerName + " could not be found.");
+            boolean prefixMayHelp = controllerName.indexOf('.') != -1;
+            if (!prefixMayHelp) {
+                throw new RuntimeException(controllerName + 
+                        " could not be found.");
+            }
+            // Add places which were searched.
+            throw new RuntimeException(controllerName + 
+                    " could not be found.");
         }
         if (!UssdController.class.isAssignableFrom(controllerClass)) {
             throw new RuntimeException(String.format("%s is not a subclass of "
