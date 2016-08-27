@@ -112,4 +112,55 @@ public class UssdForm {
         }
         return currentInput.render();
     }
+    
+    // Used during testing.
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 37 * hash + (this.inputs != null ? this.inputs.hashCode() : 0);
+        hash = 37 * hash + this.processingPosition;
+        hash = 37 * hash + (this.controller != null ? this.controller.hashCode() : 0);
+        hash = 37 * hash + (this.action != null ? this.action.hashCode() : 0);
+        hash = 37 * hash + (this.data != null ? this.data.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final UssdForm other = (UssdForm) obj;
+        if (this.processingPosition != other.processingPosition) {
+            return false;
+        }
+        if ((this.controller == null) ? (other.controller != null) : !this.controller.equals(other.controller)) {
+            return false;
+        }
+        if ((this.action == null) ? (other.action != null) : !this.action.equals(other.action)) {
+            return false;
+        }
+        if (this.inputs != other.inputs && (this.inputs == null || !this.inputs.equals(other.inputs))) {
+            return false;
+        }
+        if (this.data != other.data && (this.data == null || !this.data.equals(other.data))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "UssdForm{" + "inputs=" + inputs + ", processingPosition=" + 
+                processingPosition + ", controller=" + controller + 
+                ", action=" + action + ", data=" + data + '}';
+    }
+    
 }

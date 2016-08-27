@@ -3,8 +3,6 @@
  */
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  *
  * @author aaron
@@ -67,7 +65,7 @@ public class UssdResponse {
     }
     
     public boolean isRelease() {
-        return StringUtils.isBlank(nextRoute);
+        return nextRoute == null;
     }
     
     public static UssdResponse render(String message) {
@@ -75,7 +73,7 @@ public class UssdResponse {
     }
     
     public static UssdResponse render(String message, String nextRoute) {
-        String type = StringUtils.isBlank(nextRoute)
+        String type = nextRoute == null
                 ? UssdResponseTypes.RELEASE.toString()
                 : UssdResponseTypes.RESPONSE.toString();
         UssdResponse response = new UssdResponse();

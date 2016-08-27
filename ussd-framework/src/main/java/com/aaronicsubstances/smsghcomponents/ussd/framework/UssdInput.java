@@ -128,5 +128,98 @@ public class UssdInput {
             this.display = display;
             this.value = value;
         }
+        
+        // Used during testing.
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 47 * hash + (this.display != null ? this.display.hashCode() : 0);
+            hash = 47 * hash + (this.value != null ? this.value.hashCode() : 0);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Option other = (Option) obj;
+            if ((this.display == null) ? (other.display != null) : 
+                    !this.display.equals(other.display)) {
+                return false;
+            }
+            if ((this.value == null) ? (other.value != null) : 
+                    !this.value.equals(other.value)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Option{" + "display=" + display + ", value=" + value + '}';
+        }
     }
+    
+    // Used during testing.
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 37 * hash + (this.displayName != null ? this.displayName.hashCode() : 0);
+        hash = 37 * hash + (this.header != null ? this.header.hashCode() : 0);
+        hash = 37 * hash + (this.message != null ? this.message.hashCode() : 0);
+        hash = 37 * hash + (this.options != null ? this.options.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final UssdInput other = (UssdInput) obj;
+        if ((this.name == null) ? (other.name != null) : 
+                !this.name.equals(other.name)) {
+            return false;
+        }
+        if ((this.displayName == null) ? (other.displayName != null) : 
+                !this.displayName.equals(other.displayName)) {
+            return false;
+        }
+        if ((this.header == null) ? (other.header != null) : 
+                !this.header.equals(other.header)) {
+            return false;
+        }
+        if ((this.message == null) ? (other.message != null) : 
+                !this.message.equals(other.message)) {
+            return false;
+        }
+        if (this.options != other.options && (this.options == null || 
+                !this.options.equals(other.options))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "UssdInput{" + "name=" + name + ", displayName=" + 
+                displayName + ", header=" + header + ", message=" + 
+                message + ", options=" + options + '}';
+    }    
 }

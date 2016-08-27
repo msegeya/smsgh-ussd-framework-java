@@ -5,3 +5,4 @@ dist/
 nbdist/
 .nb-gradle/
 target/
+/ussd-framework/nbproject/

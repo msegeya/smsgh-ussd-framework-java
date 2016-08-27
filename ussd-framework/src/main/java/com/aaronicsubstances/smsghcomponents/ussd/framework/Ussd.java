@@ -1,24 +1,32 @@
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
-import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.LoggingStore;
 import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.SessionStore;
+import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import java.io.*;
 import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 
 public class Ussd {
-
+    public static final int MAX_REDIRECT_COUNT = 10;
+    
     public static boolean process(
             HttpServletRequest request, HttpServletResponse response,
-            SessionStore store,
+            SessionStore store, String[] controllerPackages,
             String initiationController, String initiationAction,
-            Map<String, String> data, LoggingStore loggingStore,
-            String arbitraryLogData) throws ServletException, IOException {
-        
+            Map<String, Object> controllerData, 
+            UssdRequestListener requestListener) 
+            throws ServletException, IOException {
+        if (request == null) {
+            throw new IllegalArgumentException("\"request\" argument cannot be "
+                    + "null");
+        }
+        if (response == null) {
+            throw new IllegalArgumentException("\"response\" argument cannot be "
+                    + "null");
+        }
         if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
             // These CORS headers are necessary for Ussd Simulator at
             // http://apps.smsgh.com/UssdSimulator/ to work with
@@ -40,14 +48,16 @@ public class Ussd {
         if (!request.getMethod().equalsIgnoreCase("POST")) {
             return false;
         }
-        String ussdRequestJson = IOUtils.toString(request.getInputStream(),
+        byte[] ussdRequestJsonBytes = ByteStreams.toByteArray(
+                request.getInputStream());
+        String ussdRequestJson = new String(ussdRequestJsonBytes,
                 "utf-8");
         Gson gson = new Gson();
         UssdRequest ussdRequest = gson.fromJson(ussdRequestJson, 
                 UssdRequest.class);
-        UssdResponse ussdResponse = processRequest(store, ussdRequest, 
-                initiationController, initiationAction, data, loggingStore, 
-                arbitraryLogData, false);
+        UssdResponse ussdResponse = processRequest(ussdRequest, 
+                controllerPackages, initiationController, initiationAction, 
+                store, controllerData, requestListener);
         String ussdResponseJson = gson.toJson(ussdResponse);
         byte [] ussdResponseJsonBytes = ussdResponseJson.getBytes("UTF-8");
         
@@ -63,15 +73,34 @@ public class Ussd {
         return true;
     }
 
-    public static UssdResponse processRequest(SessionStore store, UssdRequest request,
-            String initiationController, String initiationAction,
-            Map<String, String> data, LoggingStore loggingStore,
-            String arbitraryLogData, boolean close) {
-        Date startTime = new Date();
-        if (data == null) {
-            data = new HashMap<String, String>();
+    public static UssdResponse processRequest(UssdRequest request,
+            String[] controllerPackages, String initiationController, 
+            String initiationAction, SessionStore store,
+            Map<String, Object> controllerData, 
+            UssdRequestListener requestListener) {
+        if (request == null) {
+            throw new IllegalArgumentException("\"request\" argument cannot be "
+                    + "null");
         }
-        UssdContext context = new UssdContext(store, request, data);
+        if (initiationController == null) {
+            throw new IllegalArgumentException("\"initiationController\" "
+                    + "argument cannot be null");            
+        }
+        if (initiationAction == null) {
+            throw new IllegalArgumentException("\"initiationAction\" argument "
+                    + "cannot be null");         
+        }
+        if (store == null) {
+            throw new IllegalArgumentException("\"store\" argument "
+                    + "cannot be null");
+        }
+        
+        Date startTime = new Date();
+        if (requestListener != null) {
+            requestListener.requestEntering(startTime, request);
+        }
+        UssdContext context = new UssdContext(store, request, 
+                controllerPackages, controllerData);
         UssdResponse response;
         Date endTime;
         try {
@@ -91,38 +120,48 @@ public class Ussd {
             response.setException(t);
         }
         finally {
-            if (close) {
-                context.close();
-            }
             endTime = new Date();
+        }
+        if (requestListener != null) {
+            requestListener.responseLeaving(startTime, request, endTime,
+                    response);
         }
         return response;
     }
 
     private static UssdResponse processInitiationRequest(UssdContext context, 
             String route) {
+        // Delete previous session for same phone number, before starting anew.
         context.sessionClose();
         context.sessionSetNextRoute(route);
         return processContinuationRequest(context);
     }
 
     private static UssdResponse processContinuationRequest(UssdContext context) {
-        while (true) {
+        UssdResponse response = null;
+        int redirectCount = 0;
+        while (redirectCount < MAX_REDIRECT_COUNT && response == null) {
             boolean exists = context.sessionExists();
             if (!exists)
             {
                 throw new RuntimeException("Session does not exist.");
             }
-            UssdResponse response = context.sessionExecuteAction();
+            response = context.sessionExecuteAction();
             if (!response.isRelease())
             {
                 context.sessionSetNextRoute(response.getNextRoute());
             }
             if (response.isRedirect())
             {
-                continue;
+                response = null;
+                redirectCount++;
             }
-            return response;
         }
+        if (response == null) {
+            throw new RuntimeException(String.format(
+                    "Failed to get final ussd response after %d redirect%s.",
+                    redirectCount, redirectCount == 1 ? "" : "s"));
+        }
+        return response;
     }
 }

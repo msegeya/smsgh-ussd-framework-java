@@ -6,7 +6,6 @@ package com.aaronicsubstances.smsghcomponents.ussd.framework;
 import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.SessionStore;
 import java.lang.reflect.Method;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -15,23 +14,33 @@ import org.apache.commons.lang3.StringUtils;
 public class UssdContext {
     private SessionStore store;
     private UssdRequest request;
-    private Map<String, String> data;
+    private String[] controllerPackages;
+    private Map<String, Object> controllerData;
     private UssdDataBag dataBag;
     
     public UssdContext(SessionStore store, UssdRequest request, 
-            Map<String, String> data) {
+            String[] controllerPackages,
+            Map<String, Object> controllerData) {
+        if (store == null) {
+            throw new IllegalArgumentException("\"store\" argument "
+                    + "cannot be null");
+        }
+        if (request == null) {
+            throw new IllegalArgumentException("\"request\" argument "
+                    + "cannot be null");
+        }
         this.store = store;
         this.request = request;
-        this.data = data;
+        this.controllerData = controllerData;
         this.dataBag = new UssdDataBag(store, getDataBagKey());
     }
     
     public String getNextRouteKey() {
-        return String.format("%s.%s", request.getMobile(), "NextRoute");
+        return String.format("%s.%s", request.getSessionId(), "NextRoute");
     }
     
     public String getDataBagKey() {
-        return String.format("%s.%s", request.getMobile(), "DataBag");
+        return String.format("%s.%s", request.getSessionId(), "DataBag");
     }
 
     public void sessionSetNextRoute(String nextRoute) {
@@ -50,28 +59,52 @@ public class UssdContext {
 
     public UssdResponse sessionExecuteAction() {
         String route = store.getValue(getNextRouteKey());
+        if (route == null) {
+            throw new UssdFrameworkException("No route was found.");
+        }
         int periodIndex = route.lastIndexOf('.');
         if (periodIndex == -1) {
-            throw new RuntimeException("Invalid route format. "
-                    + "Must be \"SomeController.Action\"." +
-                "Current route is " + route);
+            throw new UssdFrameworkException("Invalid route format. "
+                    + "Must be \"SomeController.action\"." +
+                "Current route is: " + route);
         }
         String controllerName = route.substring(0, periodIndex);
         String actionName = route.substring(periodIndex+1);
-        Class controllerClass;
+        Class controllerClass = null;
         try {
             controllerClass = Class.forName(controllerName);
         }
-        catch (ClassNotFoundException ex) {
-            boolean prefixMayHelp = controllerName.indexOf('.') != -1;
-            if (!prefixMayHelp) {
-                throw new RuntimeException(controllerName + 
-                        " could not be found.");
+        catch (ClassNotFoundException ex) { 
+            boolean packagesMayHelp = controllerName.indexOf('.') == -1;
+            if (!packagesMayHelp) {
+                throw new RuntimeException('"'+ controllerName + "\" " + 
+                        "class could not be found.");
             }
-            // Add places which were searched.
-            throw new RuntimeException(controllerName + 
-                    " could not be found.");
         }
+        if (controllerClass == null) {
+            StringBuilder attemptedClasses = new StringBuilder();
+            attemptedClasses.append(' ').append(controllerName);
+            if (controllerPackages != null) {
+                for (String controllerPackage : controllerPackages) {
+                    String fullControllerName = controllerPackage + '.' +
+                            controllerName;
+                    try {
+                        controllerClass = Class.forName(fullControllerName);
+                        break;
+                    }
+                    catch (ClassNotFoundException ex) {}
+                    attemptedClasses.append(", ");
+                    attemptedClasses.append(fullControllerName);
+                }
+            }
+            if (controllerClass == null) {                    
+                throw new RuntimeException(String.format(
+                        "\"%s\" class could not be found. Tried to load "
+                                + "the following classes: %s",
+                        controllerName, attemptedClasses));
+            }
+        }
+        
         if (!UssdController.class.isAssignableFrom(controllerClass)) {
             throw new RuntimeException(String.format("%s is not a subclass of "
                     + "%s", controllerClass, UssdController.class));
@@ -103,7 +136,7 @@ public class UssdContext {
         
         controller.setRequest(request);
         controller.setDataBag(dataBag);
-        controller.setData(data);
+        controller.setControllerData(controllerData);
         controller.init();
         
         Object someObj;
@@ -123,9 +156,5 @@ public class UssdContext {
         }
         UssdResponse response = (UssdResponse)someObj;
         return response;
-    }
-
-    public void close() {
-        store.close();
     }
 }

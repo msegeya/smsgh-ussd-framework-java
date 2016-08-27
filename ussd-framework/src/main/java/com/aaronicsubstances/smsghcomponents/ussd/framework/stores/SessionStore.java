@@ -21,6 +21,4 @@ public interface SessionStore {
     String getValue(String key);
     boolean valueExists(String key);
     void deleteValue(String key);
-    
-    void close();
 }

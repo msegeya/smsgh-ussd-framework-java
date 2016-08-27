@@ -3,10 +3,6 @@
  */
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -15,22 +11,28 @@ import java.util.Map;
  * @author aaron
  */
 public class UssdController {
-    private static final String MENU_PROCESSOR_DATA_KEY = "MenuProcessorData";
-    private static final String FORM_PROCESSOR_DATA_KEY = "FormProcessorData";
-    private static final String FORM_DATA_KEY = "FormData";
+    public static final String MENU_PROCESSOR_DATA_KEY = 
+            UssdController.class.getName() + ".MenuProcessorData";
+    public static final String FORM_PROCESSOR_DATA_KEY = 
+            UssdController.class.getName() + ".FormProcessorData";
+    public static final String FORM_DATA_KEY = 
+            UssdController.class.getName() + ".FormData";
         
     private UssdRequest request;
-    private Map<String, String> data;
+    private Map<String, Object> controllerData;
     private UssdDataBag dataBag;
     private Map<String, String> formData;
     
     public void init() {
-        String json = dataBag.get(FORM_DATA_KEY);
-        if (json != null)
-        {
-            Gson gson = new Gson();
-            Type type = new TypeToken<Map<String, String>>(){}.getType();
-            formData = gson.fromJson(json, type);
+        // Retrieve any form data existing from previous ussd screens,
+        // for use by current route
+        String repr = dataBag.get(FORM_DATA_KEY);
+        try {
+            formData = UssdUtils.unmarshallMap(repr);
+        }
+        catch (RuntimeException ex) {
+            throw new UssdFrameworkException("An error occured while getting "
+                    + "form data.", ex);
         }
     }
 
@@ -38,23 +40,23 @@ public class UssdController {
         return request;
     }
 
-    public void setRequest(UssdRequest request) {
+    void setRequest(UssdRequest request) {
         this.request = request;
     }
 
-    public Map<String, String> getData() {
-        return data;
+    public Map<String, Object> getControllerData() {
+        return controllerData;
     }
 
-    public void setData(Map<String, String> data) {
-        this.data = data;
+    void setControllerData(Map<String, Object> controllerData) {
+        this.controllerData = controllerData;
     }
 
     public UssdDataBag getDataBag() {
         return dataBag;
     }
 
-    public void setDataBag(UssdDataBag dataBag) {
+    void setDataBag(UssdDataBag dataBag) {
         this.dataBag = dataBag;
     }
 
@@ -62,15 +64,15 @@ public class UssdController {
         return formData;
     }
 
-    public void setFormData(Map<String, String> formData) {
+    void setFormData(Map<String, String> formData) {
         this.formData = formData;
     }
     
-    private String route(String action) {
-        return route(action, null);
-    }
-    
     private String route(String action, String controller) {
+        if (action == null) {
+            throw new IllegalArgumentException("\"action\" argument "
+                    + "cannot be null");
+        }
         if (controller == null) {
             controller = getClass().getName();
         }
@@ -104,47 +106,63 @@ public class UssdController {
     }
     
     public UssdResponse renderMenu(UssdMenu ussdMenu) {
-        Gson gson = new Gson();
-        String json = gson.toJson(ussdMenu);
-        dataBag.set(MENU_PROCESSOR_DATA_KEY, json);
+        if (ussdMenu == null) {
+            throw new IllegalArgumentException("\"ussdMenu\" argument cannot "
+                    + "be null");
+        }
+        String repr = UssdUtils.marshallUssdMenu(ussdMenu);
+        dataBag.set(MENU_PROCESSOR_DATA_KEY, repr);
         String message = ussdMenu.render();
         return render(message, "menuProcessor");
     }
     
     public UssdResponse renderForm(UssdForm form) {
-        Gson gson = new Gson();
-        String json = gson.toJson(form);
-        dataBag.set(FORM_PROCESSOR_DATA_KEY, json);
-        return redirect("formInputDisplay");
+        if (form == null) {
+            throw new IllegalArgumentException("\"form\" argument cannot "
+                    + "be null");
+        }
+        String repr = UssdUtils.marshallUssdForm(form);
+        dataBag.set(FORM_PROCESSOR_DATA_KEY, repr);
+        String message = form.render();
+        return render(message, "formInputProcessor");
     }
     
     public UssdResponse menuProcessor() {
-        String json = dataBag.get(MENU_PROCESSOR_DATA_KEY);
-        Gson gson = new Gson();
-        UssdMenu menu = gson.fromJson(json, UssdMenu.class);
-        UssdMenuItem item;
-        try {
-            int choice = Integer.parseInt(request.getTrimmedMessage());
-            item = menu.getItems().get(choice - 1);
+        UssdMenu menu = getMenu();
+        UssdMenuItem chosenItem = null;
+        String choice = request.getTrimmedMessage();
+        for (UssdMenuItem item : menu.getItems()) {
+            if (item == null) {
+                throw new UssdFrameworkException("Encountered null "
+                        + "ussd menu item.");
+            }
+            if (item.getIndex().equalsIgnoreCase(choice)) {
+                chosenItem = item;
+                break;
+            }
         }
-        catch (Exception ex) {
-            return render(String.format("Menu choice %s does not exist.", 
-                    request.getTrimmedMessage()));
+        if (chosenItem == null) {
+            return handleInvalidMenuChoice(menu, choice);
         }
         dataBag.delete(MENU_PROCESSOR_DATA_KEY);
-        return redirect(item.getAction(), item.getController());
+        return redirect(chosenItem.getAction(), chosenItem.getController());
     }
     
-    public UssdResponse formInputDisplay() {
-        UssdForm form = getForm();
-        String message = form.render();
-        return render(message, "formInputProcessor");
+    protected UssdResponse handleInvalidMenuChoice(UssdMenu menu,
+            String invalidMenuChoice) {
+        // Redisplay menu.
+        return renderMenu(menu);
+        /*return render(String.format("Menu choice %s does not exist.", 
+                invalidMenuChoice));*/
     }
     
     public UssdResponse formInputProcessor() {
         UssdForm form = getForm();
         ArrayList<UssdInput> inputs = form.getInputs();
         UssdInput input = inputs.get(form.getProcessingPosition());
+        if (input == null) {
+            throw new UssdFrameworkException("Encountered null ussd form input.");
+        }
         String key = input.getName();
         String value;
         if (!input.hasOptions())
@@ -153,37 +171,73 @@ public class UssdController {
         }
         else
         {
-            try
-            {
+            UssdInput.Option option;
+            try {
                 int choice = Integer.parseInt(request.getTrimmedMessage());
-                value = input.getOptions().get(choice - 1).value;
+                option = input.getOptions().get(choice - 1);
             }
-            catch (Exception ex)
-            {
-                return render(String.format("Option %s does not exist.", 
-                    request.getTrimmedMessage()));
+            catch (Exception ex) {
+                return handleInvalidFormInputOption(form,
+                        request.getTrimmedMessage());
             }
+            if (option == null) {
+                throw new UssdFrameworkException("Encountered null ussd input "
+                        + "option");
+            }
+            value = option.value;
         }
         form.getData().put(key, value);
-        Gson gson = new Gson();
         if (form.getProcessingPosition() == (inputs.size() - 1))
         {
             dataBag.delete(FORM_PROCESSOR_DATA_KEY);
-            String jsonData = gson.toJson(form.getData());
-            dataBag.set(FORM_DATA_KEY, jsonData);
+            String formDataRepr = UssdUtils.marshallMap(form.getData());
+            dataBag.set(FORM_DATA_KEY, formDataRepr);
             return redirect(form.getAction(), form.getController());
         }
         form.setProcessingPosition(form.getProcessingPosition()+1);
-        String json = gson.toJson(form);
-        dataBag.set(FORM_PROCESSOR_DATA_KEY, json);
-        return redirect("formInputDisplay");
+        String formRepr = UssdUtils.marshallUssdForm(form);
+        dataBag.set(FORM_PROCESSOR_DATA_KEY, formRepr);
+        String message = form.render();
+        return render(message, "formInputProcessor");
     }
     
-    private UssdForm getForm()
-    {
-        String json = dataBag.get(FORM_PROCESSOR_DATA_KEY);
-        Gson gson = new Gson();
-        UssdForm form = gson.fromJson(json, UssdForm.class);
+    protected UssdResponse handleInvalidFormInputOption(UssdForm form,
+            String invalidOption) {
+        // Redisplay form at current input.
+        return renderForm(form);
+        /*return render(String.format("Option %s does not exist.", 
+                    invalidOption));*/
+    }
+    
+    private UssdMenu getMenu() {        
+        String repr = dataBag.get(MENU_PROCESSOR_DATA_KEY);
+        UssdMenu menu;
+        try {
+            menu = UssdUtils.unmarshallUssdMenu(repr);
+        }
+        catch (RuntimeException ex) {
+            throw new UssdFrameworkException("An error occured while getting "
+                    + "UssdMenu object.", ex);
+        }
+        if (menu == null) {
+            throw new UssdFrameworkException("UssdMenu object could not be found.");
+        }
+        return menu;
+    }
+    
+    private UssdForm getForm() {
+        String repr = dataBag.get(FORM_PROCESSOR_DATA_KEY);
+        UssdForm form;
+        try {
+            form = UssdUtils.unmarshallUssdForm(repr);            
+        }
+        catch (RuntimeException ex) {
+            throw new UssdFrameworkException("An error occured while getting "
+                    + "UssdForm object.", ex);
+        }
+        if (form == null) {
+            throw new UssdFrameworkException("UssdForm object could not be found.");
+        }
         return form;
     }
 }
