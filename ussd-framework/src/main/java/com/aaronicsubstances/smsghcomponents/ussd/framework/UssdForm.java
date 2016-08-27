@@ -46,56 +46,61 @@ public class UssdForm {
         return inputs;
     }
 
-    public void setInputs(ArrayList<UssdInput> inputs) {
+    public UssdForm inputs(ArrayList<UssdInput> inputs) {
         if (inputs == null) {
             throw new IllegalArgumentException("\"inputs\" argument cannot "
                     + "be null");
         }
         this.inputs = inputs;
+        return this;
     }
 
     public int getProcessingPosition() {
         return processingPosition;
     }
 
-    public void setProcessingPosition(int processingPosition) {
+    public UssdForm processingPosition(int processingPosition) {
         this.processingPosition = processingPosition;
+        return this;
     }
 
     public String getController() {
         return controller;
     }
 
-    public void setController(String controller) {
+    public UssdForm controller(String controller) {
         if (controller == null) {
             throw new IllegalArgumentException("\"controller\" argument "
                     + "cannot be null");
         }
         this.controller = controller;
+        return this;
     }
 
     public String getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public UssdForm action(String action) {
         if (action == null) {
             throw new IllegalArgumentException("\"action\" argument cannot "
                     + "be null");
         }
         this.action = action;
+        return this;
     }
 
     public Map<String, String> getData() {
         return data;
     }
 
-    public void setData(Map<String, String> data) {
+    public UssdForm data(Map<String, String> data) {
         if (data == null) {
             throw new IllegalArgumentException("\"data\" argument cannot "
                     + "be null");
         }
         this.data = data;
+        return this;
     }
     
     public String render() {

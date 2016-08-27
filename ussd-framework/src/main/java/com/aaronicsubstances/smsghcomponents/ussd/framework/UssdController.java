@@ -124,7 +124,7 @@ public class UssdController {
         String repr = UssdUtils.marshallUssdForm(form);
         dataBag.set(FORM_PROCESSOR_DATA_KEY, repr);
         String message = form.render();
-        return render(message, "formInputProcessor");
+        return render(message, "formProcessor");
     }
     
     public UssdResponse menuProcessor() {
@@ -156,7 +156,7 @@ public class UssdController {
                 invalidMenuChoice));*/
     }
     
-    public UssdResponse formInputProcessor() {
+    public UssdResponse formProcessor() {
         UssdForm form = getForm();
         ArrayList<UssdInput> inputs = form.getInputs();
         UssdInput input = inputs.get(form.getProcessingPosition());
@@ -194,11 +194,11 @@ public class UssdController {
             dataBag.set(FORM_DATA_KEY, formDataRepr);
             return redirect(form.getAction(), form.getController());
         }
-        form.setProcessingPosition(form.getProcessingPosition()+1);
+        form.processingPosition(form.getProcessingPosition()+1);
         String formRepr = UssdUtils.marshallUssdForm(form);
         dataBag.set(FORM_PROCESSOR_DATA_KEY, formRepr);
         String message = form.render();
-        return render(message, "formInputProcessor");
+        return render(message, "formProcessor");
     }
     
     protected UssdResponse handleInvalidFormInputOption(UssdForm form,

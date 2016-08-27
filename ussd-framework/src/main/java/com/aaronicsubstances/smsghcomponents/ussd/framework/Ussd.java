@@ -1,10 +1,9 @@
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
-import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.SessionStore;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,11 +13,12 @@ public class Ussd {
     
     public static boolean process(
             HttpServletRequest request, HttpServletResponse response,
-            SessionStore store, String[] controllerPackages,
-            String initiationController, String initiationAction,
-            Map<String, Object> controllerData, 
-            UssdRequestListener requestListener) 
+            UssdConfig ussdConfig) 
             throws ServletException, IOException {
+        if (ussdConfig == null) {
+            throw new IllegalArgumentException("\"ussdConfig\" argument cannot be "
+                    + "null");
+        }
         if (request == null) {
             throw new IllegalArgumentException("\"request\" argument cannot be "
                     + "null");
@@ -27,12 +27,16 @@ public class Ussd {
             throw new IllegalArgumentException("\"response\" argument cannot be "
                     + "null");
         }
+        String accessControlAllowOrigin = "http://apps.smsgh.com";
+        if (ussdConfig.getAccessControlAllowOrigin() != null) {
+            accessControlAllowOrigin = ussdConfig.getAccessControlAllowOrigin();
+        }
         if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
             // These CORS headers are necessary for Ussd Simulator at
             // http://apps.smsgh.com/UssdSimulator/ to work with
             // a Ussd app under test.
             response.setHeader("Access-Control-Allow-Origin",
-                    "http://apps.smsgh.com");
+                    accessControlAllowOrigin);
             response.setHeader("Access-Control-Allow-Methods",
                     "POST, OPTIONS");
             response.setHeader("Access-Control-Max-Age",
@@ -55,9 +59,7 @@ public class Ussd {
         Gson gson = new Gson();
         UssdRequest ussdRequest = gson.fromJson(ussdRequestJson, 
                 UssdRequest.class);
-        UssdResponse ussdResponse = processRequest(ussdRequest, 
-                controllerPackages, initiationController, initiationAction, 
-                store, controllerData, requestListener);
+        UssdResponse ussdResponse = processRequest(ussdRequest, ussdConfig);
         String ussdResponseJson = gson.toJson(ussdResponse);
         byte [] ussdResponseJsonBytes = ussdResponseJson.getBytes("UTF-8");
         
@@ -65,7 +67,7 @@ public class Ussd {
         // http://apps.smsgh.com/UssdSimulator/ to work with
         // a Ussd app under test.
         response.setHeader("Access-Control-Allow-Origin",
-                "http://apps.smsgh.com");
+                accessControlAllowOrigin);
         
         response.setContentType("application/json;charset=utf-8");
         response.setContentLength(ussdResponseJsonBytes.length);
@@ -74,40 +76,47 @@ public class Ussd {
     }
 
     public static UssdResponse processRequest(UssdRequest request,
-            String[] controllerPackages, String initiationController, 
-            String initiationAction, SessionStore store,
-            Map<String, Object> controllerData, 
-            UssdRequestListener requestListener) {
+            UssdConfig ussdConfig) {
         if (request == null) {
-            throw new IllegalArgumentException("\"request\" argument cannot be "
-                    + "null");
-        }
-        if (initiationController == null) {
-            throw new IllegalArgumentException("\"initiationController\" "
-                    + "argument cannot be null");            
-        }
-        if (initiationAction == null) {
-            throw new IllegalArgumentException("\"initiationAction\" argument "
-                    + "cannot be null");         
-        }
-        if (store == null) {
-            throw new IllegalArgumentException("\"store\" argument "
+            throw new IllegalArgumentException("\"request\" argument "
                     + "cannot be null");
+        }
+        if (ussdConfig == null) {
+            throw new IllegalArgumentException("\"ussdConfig\" argument "
+                    + "cannot be null");
+        }
+        if (ussdConfig.getStore() == null) {
+            throw new IllegalArgumentException("\"ussdConfig\" argument cannot "
+                    + "have null for \"store\" property.");
         }
         
         Date startTime = new Date();
-        if (requestListener != null) {
-            requestListener.requestEntering(startTime, request);
+        if (ussdConfig.getRequestListener() != null) {
+            ussdConfig.getRequestListener().requestEntering(startTime, request);
         }
-        UssdContext context = new UssdContext(store, request, 
-                controllerPackages, controllerData);
+        UssdContext context = new UssdContext(ussdConfig.getStore(), request, 
+                ussdConfig.getControllerPackages(), 
+                ussdConfig.getControllerData());
         UssdResponse response;
         Date endTime;
         try {
             switch (request.getRequestType()) {
                 case INITIATION:
-                    String route = String.format("%s.%s", initiationController,
-                            initiationAction);
+                    if (ussdConfig.getInitiationController() == null) {
+                        throw new IllegalArgumentException(
+                                "\"ussdConfig\" argument cannot "
+                                + "have null for \"initiationController\" "
+                                        + "property.");
+                    }
+                    if (ussdConfig.getInitiationAction() == null) {
+                        throw new IllegalArgumentException(
+                                "\"ussdConfig\" argument cannot "
+                                + "have null for \"initiationAction\" "
+                                        + "property.");  
+                    }
+                    String route = String.format("%s.%s",
+                            ussdConfig.getInitiationController(),
+                            ussdConfig.getInitiationAction());
                     response = processInitiationRequest(context, route);
                     break;
                 default:
@@ -122,17 +131,15 @@ public class Ussd {
         finally {
             endTime = new Date();
         }
-        if (requestListener != null) {
-            requestListener.responseLeaving(startTime, request, endTime,
-                    response);
+        if (ussdConfig.getRequestListener() != null) {
+            ussdConfig.getRequestListener().responseLeaving(
+                    startTime, request, endTime, response);
         }
         return response;
     }
 
     private static UssdResponse processInitiationRequest(UssdContext context, 
             String route) {
-        // Delete previous session for same phone number, before starting anew.
-        context.sessionClose();
         context.sessionSetNextRoute(route);
         return processContinuationRequest(context);
     }

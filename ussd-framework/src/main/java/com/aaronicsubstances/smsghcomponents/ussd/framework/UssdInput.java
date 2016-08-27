@@ -65,43 +65,48 @@ public class UssdInput {
         return name;
     }
 
-    public void setName(String name) {
+    public UssdInput name(String name) {
         if (name == null) {
             throw new IllegalArgumentException("\"name\" argument cannot be null");
         }
         this.name = name;
+        return this;
     }
 
     public String getDisplayName() {
         return displayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public UssdInput displayName(String displayName) {
         this.displayName = displayName;
+        return this;
     }
 
     public String getHeader() {
         return header;
     }
 
-    public void setHeader(String header) {
+    public UssdInput header(String header) {
         this.header = header;
+        return this;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public UssdInput message(String message) {
         this.message = message;
+        return this;
     }
 
     public ArrayList<Option> getOptions() {
         return options;
     }
 
-    public void setOptions(ArrayList<Option> options) {
+    public UssdInput options(ArrayList<Option> options) {
         this.options = options;
+        return this;
     }
     
     public boolean hasOptions() {

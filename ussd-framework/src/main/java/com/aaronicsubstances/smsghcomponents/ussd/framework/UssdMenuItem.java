@@ -41,48 +41,52 @@ public class UssdMenuItem {
         return index;
     }
 
-    public void setIndex(String index) {
+    public UssdMenuItem setIndex(String index) {
         if (index == null) {
             throw new IllegalArgumentException("\"index\" argument cannot "
                     + "be null");
         }
         this.index = index;
+        return this;
     }
 
     public String getDisplay() {
         return display;
     }
 
-    public void setDisplay(String display) {
+    public UssdMenuItem setDisplay(String display) {
         if (display == null) {
             throw new IllegalArgumentException("\"display\" argument cannot "
                     + "be null");
         }
         this.display = display;
+        return this;
     }
 
     public String getController() {
         return controller;
     }
 
-    public void setController(String controller) {
+    public UssdMenuItem setController(String controller) {
         if (controller == null) {
             throw new IllegalArgumentException("\"controller\" argument cannot "
                     + "be null");
         }
         this.controller = controller;
+        return this;
     }
 
     public String getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public UssdMenuItem setAction(String action) {
         if (action == null) {
             throw new IllegalArgumentException("\"action\" argument cannot "
                     + "be null");
         }
         this.action = action;
+        return this;
     }
     
     // Used during testing.

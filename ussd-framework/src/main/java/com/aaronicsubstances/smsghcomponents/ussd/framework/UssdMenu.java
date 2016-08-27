@@ -32,36 +32,40 @@ public class UssdMenu {
         return header;
     }
 
-    public void setHeader(String header) {
+    public UssdMenu header(String header) {
         this.header = header;
+        return this;
     }
 
     public String getFooter() {
         return footer;
     }
 
-    public void setFooter(String footer) {
+    public UssdMenu footer(String footer) {
         this.footer = footer;
+        return this;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public UssdMenu message(String message) {
         this.message = message;
+        return this;
     }
 
     public ArrayList<UssdMenuItem> getItems() {
         return items;
     }
 
-    public void setItems(ArrayList<UssdMenuItem> items) {
+    public UssdMenu items(ArrayList<UssdMenuItem> items) {
         if (items == null) {
             throw new IllegalArgumentException("\"items\" argument cannot be "
                     + "null");
         }
         this.items = items;
+        return this;
     }
     
     public String render() {
