@@ -4,14 +4,10 @@
 package com.aaronicsubstances.smsghcomponents.ussd.demo;
 
 import com.aaronicsubstances.smsghcomponents.ussd.framework.Ussd;
-import com.aaronicsubstances.smsghcomponents.ussd.framework.UssdConfig;
 import com.aaronicsubstances.smsghcomponents.ussd.framework.UssdRequest;
 import com.aaronicsubstances.smsghcomponents.ussd.framework.UssdRequestListener;
 import com.aaronicsubstances.smsghcomponents.ussd.framework.UssdResponse;
-import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.InMemorySessionStore;
-import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.SessionStore;
 import java.io.IOException;
-import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,49 +16,75 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author aaron
+ * Demonstrates example setup of a servlet for the Ussd framework. The framework
+ * needs a servlet to kickstart the ussd request processing.
+ * 
+ * @author Aaron Baffour-Awuah
  */
-public class UssdServlet extends HttpServlet implements UssdRequestListener {
-    private static final int SESSION_STORE_TIMEOUT_MILLIS = 65000;
-    private SessionStore ussdSessionStore;
+public class UssdServlet extends HttpServlet {
+   
+    private static final Logger LOG = LoggerFactory.getLogger(
+            UssdServlet.class);
     
-    private static final Logger LOG = LoggerFactory.getLogger(UssdServlet.class);
-    
-    @Override
-    public void init() {
-        ussdSessionStore = new InMemorySessionStore(
-                SESSION_STORE_TIMEOUT_MILLIS);
-    }
-    
+    /**
+     * Overridden to handle both POST and OPTIONS verbs. Ussd API uses only POST,
+     * but Ussd simulator at http://apps.smsgh.com/UssdSimulator/ uses OPTIONS
+     * as well.
+     * <p>
+     * If you don't intend to use the simulator, then you can
+     * override the doPost method instead, in which case you don't have to
+     * check for the return value of Ussd.service() to do anything special.
+     * 
+     * @param req
+     * @param resp
+     * @throws ServletException
+     * @throws IOException 
+     */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
-        UssdConfig ussdConfig = new UssdConfig()
-                .store(ussdSessionStore)
-                .controllerPackages(new String[]{
-                    "com.aaronicsubstances.smsghcomponents.ussd.demo"})
-                .initiationController("controllers.MainController")
-                .initiationAction("start")
-                .requestListener(this);
-        if (!Ussd.process(req, resp, ussdConfig)) {
+        // Set up a Ussd object to service request.
+        // Only the first controller and action are required.
+        // A singleton instance of InMemorySessionStore will be used to
+        // track ussd sessions and expire them when no longer in use.
+        Ussd ussd = new Ussd()
+                .initiationController("controllers.Main")
+                .initiationAction("start");
+        
+        // Optional, but almost certainly something you would want to
+        // do to avoid specifying controller names in full each time,
+        // and making it laborious to refactor the names of packages.
+        ussd.controllerPackages(new String[]{
+                    "com.aaronicsubstances.smsghcomponents.ussd.demo"});
+        
+        // Optionally set up a request listener for logging requests,
+        // processing errors and responses.
+        ussd.requestListener(new UssdRequestListener() {
+            
+            public void requestEntering(UssdRequest ussdRequest) {
+                LOG.debug("New ussd request: {}", ussdRequest);
+            }
+
+            public void responseLeaving(UssdRequest ussdRequest, 
+                    UssdResponse ussdResponse) {
+                // Log exception if any occurred.
+                if (ussdResponse.getException() != null) {
+                    LOG.error("An error occured during ussd request processing.", 
+                            ussdResponse.getException());
+                }
+                LOG.debug("Sending ussd response: {}", ussdResponse);
+            }
+        });
+        
+        // By calling upon service, POST and OPTIONS requests are handled.
+        // The USSD Simulator requires setting up CORS handling. Good news is
+        // that all this is handled for you.
+        boolean handled = ussd.service(req, resp);
+        if (!handled) {
+            // If ussd's service didn't handle request, then it means HTTP method was
+            // neither POST nor OPTIONS. In this case it fallbacks back to
+            // what it would have done: looking for doGet(), doPost(), etc.
             super.service(req, resp);
         }
-    }
-
-    public void requestEntering(Date startTime, UssdRequest ussdRequest) {
-        LOG.debug("New ussd request: {}", ussdRequest);
-    }
-
-    public void responseLeaving(Date startTime, UssdRequest ussdRequest,
-            Date endTime, UssdResponse ussdResponse) {
-        // Check for exceptions. If one occured, then the message of
-        // the ussdResponse was set from the exception.
-        // You may set a different message before response is sent.
-        if (ussdResponse.getException() != null) {
-            LOG.error("An error occured during ussd request processing.", 
-                    ussdResponse.getException());
-        }
-        LOG.debug("Sending ussd response: {}", ussdResponse);
     }
 }

@@ -8,6 +8,34 @@
     integrate with SMSGH.
     </description>
     
+    <!--
+        Sets the log config resource path (will be loaded with 
+        context.getResource(). Defaults to /WEB-INF/logback.xml.
+    -->
+    <!-- <context-param>
+        <param-name>com.smsgh.logging.config.path</param-name>
+        <param-value>/WEB-INF/logback.xml</param-value>
+    </context-param> -->
+    
+    <!-- 
+        Comma-separated list of log directory paths. 
+        Each path can start with one of
+            - sysProp.* to substitute with a system property. 
+              e.g. sysProp.user.home (useful to avoid versioning problems with
+              developer-specific directory path setting).
+            - env.* to substitute with an environment property (useful in
+              shared hosting environments). e.g. env.OPENSHIFT_DATA_DIR,
+              env.HOME/Desktop.
+        A path is skipped if its prefix is a non-existent system property 
+        or environment variable. So in the case where neither prefix is used,
+        the first path will always be used.
+        Defaults to sysProp.user.home/.logback.
+    -->
+    <!-- <context-param>
+        <param-name>com.smsgh.logging.log.dirs</param-name>
+        <param-value>sysProp.user.home/.logback</param-value>
+    </context-param> -->
+    
     <listener>
         <listener-class>
             com.aaronicsubstances.smsghcomponents.ussd.demo.LogbackInitializer

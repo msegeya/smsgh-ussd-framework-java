@@ -1,8 +1,7 @@
-nbproject/private/
+nbproject/
 build/
 nbbuild/
 dist/
 nbdist/
 .nb-gradle/
 target/
-/ussd-framework/nbproject/

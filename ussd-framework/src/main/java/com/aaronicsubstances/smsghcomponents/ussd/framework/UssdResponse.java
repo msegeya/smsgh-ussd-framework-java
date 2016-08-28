@@ -3,6 +3,7 @@
  */
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -99,6 +100,12 @@ public class UssdResponse {
         response.setNextRoute(nextRoute);
         response.setRedirect(true);
         return response;
+    }
+    
+    public static String toJson(UssdResponse instance) {
+        Gson gson = new Gson();
+        String json = gson.toJson(instance);
+        return json;
     }
 
     @Override

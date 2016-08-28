@@ -16,15 +16,17 @@ import java.util.concurrent.TimeUnit;
  * The life-time can be defined on a per-key basis, or using a default one, 
  * that is passed to the constructor.
  * <p>
- * Copied from https://gist.github.com/pcan/16faf4e59942678377e0 and modified
+ * Copied from Pierantonio Cangianiello on Github
+ * (<a href="https://gist.github.com/pcan/16faf4e59942678377e0">
+ * https://gist.github.com/pcan/16faf4e59942678377e0</a>) and modified
  * to 
  * <ol>
  *  <li>Use HashMap instead of ConcurrentHashMap so that it is clearly
- *      thread-unsafe.</li>
- *  <li>Expire on write.</li>
+ *      thread-unsafe, and thus in need of external synchronization.</li>
+ *  <li>Expire entries on write, i.e. upon update operations to map.</li>
  * </ol>
  * 
- * @author Pierantonio Cangianiello
+ * @author Aaron Baffour-Awuah
  * @param <K> the Key type
  * @param <V> the Value type
  */
@@ -116,7 +118,13 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * {@inheritDoc}
+     * Associates the given key to the given value in this map, with the specified life
+     * times in milliseconds.
+     *
+     * @param key
+     * @param value
+     * @param lifeTimeMillis
+     * @return a previously associated object for the given key (if exists).
      */
     public V put(K key, V value, long lifeTimeMillis) {
         cleanUp();
@@ -149,7 +157,10 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * {@inheritDoc}
+     * Renews the specified key, setting the life time to the initial value.
+     *
+     * @param key
+     * @return true if the key is found, false otherwise
      */
     public boolean renewKey(K key) {
         ExpiringKey<K> delayedKey = expiringKeys.get((K) key);
@@ -201,6 +212,10 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Removes all expired keys. It is called implicitly by update
+     * operations, but can also be called explicitly.
+     */
     public void cleanUp() {
         ExpiringKey<K> delayedKey = delayQueue.poll();
         while (delayedKey != null) {

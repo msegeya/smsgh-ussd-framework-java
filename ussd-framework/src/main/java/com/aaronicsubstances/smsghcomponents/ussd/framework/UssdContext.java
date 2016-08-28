@@ -4,6 +4,7 @@
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
 import com.aaronicsubstances.smsghcomponents.ussd.framework.stores.SessionStore;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -90,19 +91,30 @@ public class UssdContext {
                     catch (ClassNotFoundException ex) {}
                     attemptedClasses.append(", ");
                     attemptedClasses.append(fullControllerName);
+                    if (!fullControllerName.endsWith("Controller")) {
+                        fullControllerName = fullControllerName + "Controller";
+                        try {
+                            controllerClass = Class.forName(fullControllerName);
+                            break;
+                        }
+                        catch (ClassNotFoundException ex) {}
+                        attemptedClasses.append(", ");
+                        attemptedClasses.append(fullControllerName);
+                    }
                 }
             }
             if (controllerClass == null) {                    
                 throw new RuntimeException(String.format(
-                        "\"%s\" class could not be found. Tried to load "
+                        "Class \"%s\" could not be found. Tried to load "
                                 + "the following classes: %s",
                         controllerName, attemptedClasses));
             }
         }
         
         if (!UssdController.class.isAssignableFrom(controllerClass)) {
-            throw new RuntimeException(String.format("%s is not a subclass of "
-                    + "%s", controllerClass, UssdController.class));
+            throw new RuntimeException(String.format("Class \"%s\" does not "
+                    + "subclass \"%s\"", controllerClass, 
+                    UssdController.class.getName()));
         }
         Method action;
         try {
@@ -110,8 +122,9 @@ public class UssdContext {
         }
         catch (NoSuchMethodException ex) {
             throw new RuntimeException(String.format(
-                    "%s class does not have action %s.",
-                    controllerClass, actionName));
+                    "Class \"%s\" does not have a public no-arg action "
+                            + "named \"%s\".",
+                    controllerClass.getName(), actionName));
         }
         
         UssdController controller;        
@@ -120,13 +133,13 @@ public class UssdContext {
         }
         catch (IllegalAccessException ex) {
             throw new RuntimeException(String.format("Failed to create "
-                    + "instance of %s class. Does class have a "
-                    + "public no-arg constructor?", controllerClass));
+                    + "instance of class \"%s\". Is class a public class having a "
+                    + "public no-arg constructor?", controllerClass.getName()));
         }
         catch (InstantiationException ex) {
             throw new RuntimeException(String.format("Failed to create "
-                    + "instance of %s class. Does class have a "
-                    + "public no-arg constructor?", controllerClass), ex);
+                    + "instance of class \"%s\". Is class a public class having a "
+                    + "public no-arg constructor?", controllerClass.getName()));
         }
         
         controller.setRequest(request);
@@ -138,6 +151,16 @@ public class UssdContext {
         try {
             someObj = action.invoke(controller);
         }
+        catch (InvocationTargetException ex) {
+            Throwable t = ex.getTargetException();
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException)t;
+            }
+            if (t instanceof Error) {
+                throw (Error)t;
+            }
+            throw new RuntimeException(t);
+        }
         catch (Exception ex) {
             if (ex instanceof RuntimeException) {
                 throw (RuntimeException)ex;
@@ -145,9 +168,13 @@ public class UssdContext {
             throw new RuntimeException(ex);
         }
         if (!(someObj instanceof UssdResponse)) {
-            throw new RuntimeException(String.format("%s action did not return "
-                    + "an instance of %s class, but rather returned %s",
-                    actionName, UssdResponse.class, someObj));
+            throw new RuntimeException(String.format("Action \"%s.%s()\" "
+                    + "did not return an instance of class \"%s\", "
+                    + "but rather returned: %s{%s}",
+                    controllerClass.getName(),
+                    actionName, UssdResponse.class.getName(),
+                    someObj != null ? someObj.getClass().getName() : null, 
+                    someObj));
         }
         UssdResponse response = (UssdResponse)someObj;
         return response;

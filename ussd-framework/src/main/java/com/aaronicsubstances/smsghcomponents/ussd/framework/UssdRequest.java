@@ -3,6 +3,7 @@
  */
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -33,6 +34,12 @@ public class UssdRequest {
     
     @SerializedName("ClientState")
     private String clientState;
+    
+    public static UssdRequest fromJson(String json) {
+        Gson gson = new Gson();
+        UssdRequest instance = gson.fromJson(json, UssdRequest.class);
+        return instance;
+    }
 
     public String getMobile() {
         return mobile;

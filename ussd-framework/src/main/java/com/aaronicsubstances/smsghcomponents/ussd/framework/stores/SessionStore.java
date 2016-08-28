@@ -4,8 +4,9 @@
 package com.aaronicsubstances.smsghcomponents.ussd.framework.stores;
 
 /**
- *
- * @author aaron
+ * Common interface of classes for tracking ussd sessions.
+ * 
+ * @author Aaron Baffour-Awuah
  */
 public interface SessionStore {
     // Hash store

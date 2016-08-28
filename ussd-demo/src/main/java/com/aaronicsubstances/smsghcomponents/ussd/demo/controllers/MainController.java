@@ -12,10 +12,11 @@ import com.aaronicsubstances.smsghcomponents.ussd.framework.UssdResponse;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 /**
  *
- * @author aaron
+ * @author Aaron Baffour-Awuah
  */
 public class MainController extends UssdController {
     
@@ -32,7 +33,7 @@ public class MainController extends UssdController {
         String formHeader = "Greet Me!";
         UssdForm form = new UssdForm("greeting")
                 .addInput(new UssdInput("Name").header(formHeader))
-                .addInput(new UssdInput("Sex").header(formHeader)
+                .addInput(new UssdInput("Gender").header(formHeader)
                         .addOption(new UssdInput.Option("Male", "M"))
                         .addOption(new UssdInput.Option("Female", "F")));
         return renderForm(form);
@@ -53,10 +54,14 @@ public class MainController extends UssdController {
         }
         if (hour >= 21) {
             greeting = "Good night";
-        }
-        String name = getFormData().get("Name");
-        String prefix = getFormData().get("Sex").equals("M") ? "Master" : 
-                "Madam";
+        }        
+        
+        // formData will be null if previous screen was not a UssdForm
+        Map<String, String> formData = getFormData();
+        
+        String name = formData.get("Name");
+        String gender = formData.get("Gender");
+        String prefix = gender.equals("M") ? "Master" : "Madam";
         return render(String.format("%s, %s %s", greeting, prefix, name));
     }
     
