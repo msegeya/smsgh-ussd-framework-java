@@ -1,7 +1,7 @@
 <#if licenseFirst??>
 ${licenseFirst}
 </#if>
-${licensePrefix} (c)  2016. Aaronic Substances 
+${licensePrefix} (c) 2016. SMSGH 
 <#if licenseLast??>
 ${licenseLast}
 </#if>
