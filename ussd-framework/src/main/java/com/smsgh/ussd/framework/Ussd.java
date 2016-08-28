@@ -231,7 +231,7 @@ public class Ussd {
         }
         UssdContext context = new UssdContext(store, request, 
                 controllerPackages, controllerData);
-        UssdResponse response;
+        UssdResponse response = null;
         try {
             if (request.getType().equalsIgnoreCase(
                     UssdRequest.REQUEST_TYPE_INITIATION)) {
@@ -259,6 +259,9 @@ public class Ussd {
             response.setException(t);
         }
         finally {
+            if (response.isRelease()) {
+                context.sessionClose();
+            }
             context.close();
         }
         if (requestListener != null) {
