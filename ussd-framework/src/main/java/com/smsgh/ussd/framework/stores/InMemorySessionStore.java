@@ -129,4 +129,10 @@ public class InMemorySessionStore implements SessionStore {
     public synchronized void deleteValue(String key) {
         backingStore.remove(key);
     }    
+
+    /**
+     * Does nothing.
+     */
+    public void close() {
+    }
 }

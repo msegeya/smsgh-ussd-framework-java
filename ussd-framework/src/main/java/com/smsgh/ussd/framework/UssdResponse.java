@@ -11,9 +11,9 @@ import com.google.gson.annotations.SerializedName;
  * @author aaron
  */
 public class UssdResponse {
-    private static final String RESPONSE_TYPE_RESPONSE = "Response";
+    public static final String RESPONSE_TYPE_RESPONSE = "Response";
     
-    private static final String RESPONSE_TYPE_RELEASE = "Release";
+    public static final String RESPONSE_TYPE_RELEASE = "Release";
     
     @SerializedName("Type")
     private String type;
@@ -27,6 +27,7 @@ public class UssdResponse {
     private transient Throwable exception;
     private transient String nextRoute;
     private transient boolean redirect;
+    private transient boolean autoDialOn = true;
 
     public String getType() {
         return type;
@@ -79,6 +80,14 @@ public class UssdResponse {
     public boolean isRelease() {
         return nextRoute == null;
     }
+
+    public boolean isAutoDialOn() {
+        return autoDialOn;
+    }
+
+    public void setAutoDialOn(boolean autoDialOn) {
+        this.autoDialOn = autoDialOn;
+    }
     
     public static UssdResponse render(String message) {
         return render(message, null);
@@ -110,7 +119,9 @@ public class UssdResponse {
 
     @Override
     public String toString() {
-        return "UssdResponse{" + "type=" + type + ", message=" 
-                + message + ", clientState=" + clientState + '}';
+        return "UssdResponse{" + "type=" + type + ", message=" + message + 
+                ", clientState=" + clientState + ", exception=" + exception + 
+                ", nextRoute=" + nextRoute + ", redirect=" + redirect + 
+                ", autoDialOn=" + autoDialOn + '}';
     }
 }

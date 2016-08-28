@@ -38,14 +38,14 @@
     
     <listener>
         <listener-class>
-            com.aaronicsubstances.smsghcomponents.ussd.demo.LogbackInitializer
+            com.smsgh.ussd.demo.LogbackInitializer
         </listener-class>
     </listener>
     
     <servlet>
         <servlet-name>ussd</servlet-name>
         <servlet-class>
-            com.aaronicsubstances.smsghcomponents.ussd.demo.UssdServlet
+            com.smsgh.ussd.demo.UssdServlet
         </servlet-class>
     </servlet>
     <servlet-mapping>

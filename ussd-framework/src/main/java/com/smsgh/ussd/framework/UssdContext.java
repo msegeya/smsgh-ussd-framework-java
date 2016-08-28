@@ -36,6 +36,10 @@ public class UssdContext {
         this.controllerData = controllerData;
         this.dataBag = new UssdDataBag(store, getDataBagKey());
     }
+
+    public UssdRequest getRequest() {
+        return request;
+    }
     
     public String getNextRouteKey() {
         return String.format("%s.%s", request.getSessionId(), "NextRoute");
@@ -178,5 +182,9 @@ public class UssdContext {
         }
         UssdResponse response = (UssdResponse)someObj;
         return response;
+    }
+    
+    public void close() {
+        store.close();
     }
 }

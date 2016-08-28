@@ -6,6 +6,7 @@ package com.smsgh.ussd.framework;
 import com.smsgh.ussd.framework.stores.InMemorySessionStore;
 import com.smsgh.ussd.framework.stores.SessionStore;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 public class Ussd {
-    public static final int MAX_REDIRECT_COUNT = 10;
+    public static final int MAX_REDIRECT_COUNT = 5;
     public static final String DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN =
             "http://apps.smsgh.com";
     public static final String DEFAULT_ENCODING = "utf-8";
@@ -30,6 +31,7 @@ public class Ussd {
     private UssdRequestListener requestListener;
     private String accessControlAllowOrigin;
     private String encoding;
+    private int maxAutoDialDepth;
 
     static {
         DEFAULT_STORE = new InMemorySessionStore(SESSION_TIMEOUT_MILLIS);
@@ -94,6 +96,15 @@ public class Ussd {
 
     public Ussd errorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+        return this;
+    }
+
+    public int getMaxAutoDialDepth() {
+        return maxAutoDialDepth;
+    }
+
+    public Ussd maxAutoDialDepth(int maxAutoDialDepth) {
+        this.maxAutoDialDepth = maxAutoDialDepth;
         return this;
     }
 
@@ -222,31 +233,33 @@ public class Ussd {
                 controllerPackages, controllerData);
         UssdResponse response;
         try {
-            switch (request.getRequestType()) {
-                case INITIATION:
-                    if (initiationController == null) {
-                        throw new IllegalArgumentException(
-                                "\"initiationController\" property cannot "
-                                + "be null.");
-                    }
-                    if (initiationAction == null) {
-                        throw new IllegalArgumentException(
-                                "\"initiationAction\" property cannot "
-                                + "be null.");  
-                    }
-                    String route = String.format("%s.%s",
-                            initiationController, initiationAction);
-                    response = processInitiationRequest(context, route);
-                    break;
-                default:
-                    response = processContinuationRequest(context);
-                    break;
+            if (request.getType().equalsIgnoreCase(
+                    UssdRequest.REQUEST_TYPE_INITIATION)) {
+                if (initiationController == null) {
+                    throw new IllegalArgumentException(
+                            "\"initiationController\" property cannot "
+                            + "be null.");
+                }
+                if (initiationAction == null) {
+                    throw new IllegalArgumentException(
+                            "\"initiationAction\" property cannot "
+                            + "be null.");  
+                }
+                String route = String.format("%s.%s",
+                        initiationController, initiationAction);
+                response = processInitiationRequest(context, route);
+            }
+            else {
+                response = processContinuationRequest(context);
             }
         }
         catch (Throwable t) {
             response = UssdResponse.render(errorMessage != null ?
                     errorMessage : t.toString());
             response.setException(t);
+        }
+        finally {
+            context.close();
         }
         if (requestListener != null) {
             requestListener.responseLeaving(request, response);
@@ -257,7 +270,53 @@ public class Ussd {
     public UssdResponse processInitiationRequest(UssdContext context, 
             String route) {
         context.sessionSetNextRoute(route);
-        return processContinuationRequest(context);
+        UssdResponse ussdResponse = processContinuationRequest(context);
+        if (maxAutoDialDepth > 0 && ussdResponse.isAutoDialOn() &&
+                !ussdResponse.isRelease()) {
+            UssdRequest ussdRequest = context.getRequest();
+            String initiationMessage = ussdRequest.getMessage();
+            String serviceCode = ussdRequest.getServiceCode();
+            
+            // To make searching for dial string and split more
+            // straightforward, replace # with *.
+            initiationMessage = initiationMessage.replaceAll("#", "*");
+            serviceCode = serviceCode.replaceAll("#", "*");
+            
+            int extraIndex = initiationMessage.indexOf(serviceCode);
+            if (extraIndex == -1) {
+                throw new FrameworkException(String.format(
+                        "Service code %s not found in initiation "
+                                + "message %s", ussdRequest.getServiceCode(),
+                                ussdRequest.getMessage()));
+            }
+            
+            String extra = initiationMessage.substring(extraIndex);
+            String[] codes = extra.split("\\*");
+            
+            // codes may have empty strings if ** was in initiation message.
+            // So remove them first.
+            ArrayList<String> codeList = new ArrayList<String>();
+            for (String code : codes) {
+                if (!code.isEmpty()) {
+                    codeList.add(code);
+                }
+            }
+            codes = codeList.toArray(new String[codeList.size()]);
+            
+            int i = 0;
+            while (i < maxAutoDialDepth && i < codes.length) {
+                String nextMessage = codes[i];
+                ussdRequest.setType(UssdRequest.REQUEST_TYPE_RESPONSE);
+                ussdRequest.setClientState(ussdResponse.getClientState());
+                ussdRequest.setMessage(nextMessage);
+                ussdResponse = processContinuationRequest(context);
+                if (ussdResponse.isRelease() || !ussdResponse.isAutoDialOn()) {
+                    break;
+                }
+                i++;
+            }
+        }
+        return ussdResponse;
     }
 
     public UssdResponse processContinuationRequest(UssdContext context) {

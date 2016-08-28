@@ -11,6 +11,14 @@ import com.google.gson.annotations.SerializedName;
  * @author aaron
  */
 public class UssdRequest {
+    public static final String REQUEST_TYPE_INITIATION = "Initiation";
+    
+    public static final String REQUEST_TYPE_RESPONSE = "Response";
+    
+    public static final String REQUEST_TYPE_RELEASE = "Release";
+    
+    public static final String REQUEST_TYPE_TIMEOUT = "Timeout";
+    
     @SerializedName("Mobile")
     private String mobile;
     
@@ -105,26 +113,6 @@ public class UssdRequest {
         this.clientState = clientState;
     }
     
-    public UssdRequest.Type getRequestType() {
-        if (type == null) {
-            return null;
-        }
-        if (type.equalsIgnoreCase("Initiation")) {
-            return UssdRequest.Type.INITIATION;
-        }
-        if (type.equalsIgnoreCase("Response")) {
-            return UssdRequest.Type.RESPONSE;
-        }
-        if (type.equalsIgnoreCase("Release")) {
-            return UssdRequest.Type.RELEASE;
-        }
-        if (type.equalsIgnoreCase("Timeout")) {
-            return UssdRequest.Type.TIMEOUT;
-            
-        }
-        throw new RuntimeException();
-    }
-    
     public String getTrimmedMessage() {
         if (message == null) {
             return null;
@@ -138,9 +126,5 @@ public class UssdRequest {
                 sessionId + ", serviceCode=" + serviceCode + ", type=" + 
                 type + ", message=" + message + ", operator=" + operator +
                 ", sequence=" + sequence + ", clientState=" + clientState + '}';
-    }    
-    
-    public static enum Type {
-        INITIATION, RESPONSE, RELEASE, TIMEOUT
     }
 }

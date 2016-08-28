@@ -55,7 +55,8 @@ public class UssdServlet extends HttpServlet {
         // do to avoid specifying controller names in full each time,
         // and making it laborious to refactor the names of packages.
         ussd.controllerPackages(new String[]{
-                    "com.aaronicsubstances.smsghcomponents.ussd.demo"});
+            getClass().getPackage().getName()
+        });
         
         // Optionally set up a request listener for logging requests,
         // processing errors and responses.

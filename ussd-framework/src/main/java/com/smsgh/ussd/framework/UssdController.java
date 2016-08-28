@@ -95,17 +95,33 @@ public class UssdController {
         return render(message, action, null);
     }
     
+    public UssdResponse render(String message, String action, 
+            boolean autoDialOn) {
+        return render(message, action, null, autoDialOn);
+    }
+    
     public UssdResponse render(String message, String action,
             String controller) {
+        return render(message, action, controller, true);
+    }
+    
+    public UssdResponse render(String message, String action,
+            String controller, boolean autoDialOn) {
         if (message == null) message = "";
         String route = null;
         if (action != null) {
             route = route(action, controller);
         }
-        return UssdResponse.render(message, route);
+        UssdResponse ussdResponse = UssdResponse.render(message, route);
+        ussdResponse.setAutoDialOn(autoDialOn);
+        return ussdResponse;
     }
     
     public UssdResponse renderMenu(UssdMenu ussdMenu) {
+        return renderMenu(ussdMenu, true);
+    }
+    
+    public UssdResponse renderMenu(UssdMenu ussdMenu, boolean autoDialOn) {
         if (ussdMenu == null) {
             throw new IllegalArgumentException("\"ussdMenu\" argument cannot "
                     + "be null");
@@ -116,7 +132,12 @@ public class UssdController {
         return render(message, "menuProcessor");
     }
     
+    
     public UssdResponse renderForm(UssdForm form) {
+        return renderForm(form, true);
+    }
+    
+    public UssdResponse renderForm(UssdForm form, boolean autoDialOn) {
         if (form == null) {
             throw new IllegalArgumentException("\"form\" argument cannot "
                     + "be null");
@@ -150,10 +171,8 @@ public class UssdController {
     
     protected UssdResponse handleInvalidMenuChoice(UssdMenu menu,
             String invalidMenuChoice) {
-        // Redisplay menu.
-        return renderMenu(menu);
-        /*return render(String.format("Menu choice %s does not exist.", 
-                invalidMenuChoice));*/
+        // Redisplay menu, but turn of auto dial mechanism.
+        return renderMenu(menu, false);
     }
     
     public UssdResponse formProcessor() {
@@ -203,10 +222,8 @@ public class UssdController {
     
     protected UssdResponse handleInvalidFormInputOption(UssdForm form,
             String invalidOption) {
-        // Redisplay form at current input.
-        return renderForm(form);
-        /*return render(String.format("Option %s does not exist.", 
-                    invalidOption));*/
+        // Redisplay form at current input, but turn of auto dial mechanism.
+        return renderForm(form, false);
     }
     
     private UssdMenu getMenu() {        
