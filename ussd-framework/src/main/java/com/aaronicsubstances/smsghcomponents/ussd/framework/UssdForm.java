@@ -4,6 +4,7 @@
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -16,30 +17,20 @@ public class UssdForm {
     private String controller;
     private String action;
     private Map<String, String> data;
+    
+    public UssdForm(String action) {
+        this(action, null);
+    }
 
-    public UssdForm(ArrayList<UssdInput> inputs,
-            String controller, String action,
-            Map<String, String> data) {
-        if (inputs == null) {
-            throw new IllegalArgumentException("\"inputs\" argument cannot be "
-                    + "null");
-        }
-        if (controller == null) {
-            throw new IllegalArgumentException("\"controller\" argument cannot "
-                    + "be null");
-        }
+    public UssdForm(String action, String controller) {
         if (action == null) {
             throw new IllegalArgumentException("\"action\" argument cannot be "
                     + "null");
         }
-        if (data == null) {
-            throw new IllegalArgumentException("\"data\" argument cannot be "
-                    + "null");
-        }
-        this.inputs = inputs;
         this.controller = controller;
         this.action = action;
-        this.data = data;
+        this.inputs = new ArrayList<UssdInput>();
+        this.data = new HashMap<String, String>();
     }
 
     public ArrayList<UssdInput> getInputs() {
@@ -52,6 +43,15 @@ public class UssdForm {
                     + "be null");
         }
         this.inputs = inputs;
+        return this;
+    }
+    
+    public UssdForm addInput(UssdInput input) {
+        if (input == null) {
+            throw new IllegalArgumentException("\"input\" argument cannot "
+                    + "be null");
+        }
+        inputs.add(input);
         return this;
     }
 
@@ -69,10 +69,6 @@ public class UssdForm {
     }
 
     public UssdForm controller(String controller) {
-        if (controller == null) {
-            throw new IllegalArgumentException("\"controller\" argument "
-                    + "cannot be null");
-        }
         this.controller = controller;
         return this;
     }

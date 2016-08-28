@@ -31,7 +31,7 @@ public class UssdController {
             formData = UssdUtils.unmarshallMap(repr);
         }
         catch (RuntimeException ex) {
-            throw new UssdFrameworkException("An error occured while getting "
+            throw new FrameworkException("An error occured while getting "
                     + "form data.", ex);
         }
     }
@@ -76,7 +76,7 @@ public class UssdController {
         if (controller == null) {
             controller = getClass().getName();
         }
-        return String.format("%s.%s", action, controller);
+        return String.format("%s.%s", controller, action);
     }
     
     public UssdResponse redirect(String action) {
@@ -133,7 +133,7 @@ public class UssdController {
         String choice = request.getTrimmedMessage();
         for (UssdMenuItem item : menu.getItems()) {
             if (item == null) {
-                throw new UssdFrameworkException("Encountered null "
+                throw new FrameworkException("Encountered null "
                         + "ussd menu item.");
             }
             if (item.getIndex().equalsIgnoreCase(choice)) {
@@ -161,7 +161,7 @@ public class UssdController {
         ArrayList<UssdInput> inputs = form.getInputs();
         UssdInput input = inputs.get(form.getProcessingPosition());
         if (input == null) {
-            throw new UssdFrameworkException("Encountered null ussd form input.");
+            throw new FrameworkException("Encountered null ussd form input.");
         }
         String key = input.getName();
         String value;
@@ -181,7 +181,7 @@ public class UssdController {
                         request.getTrimmedMessage());
             }
             if (option == null) {
-                throw new UssdFrameworkException("Encountered null ussd input "
+                throw new FrameworkException("Encountered null ussd input "
                         + "option");
             }
             value = option.value;
@@ -216,11 +216,11 @@ public class UssdController {
             menu = UssdUtils.unmarshallUssdMenu(repr);
         }
         catch (RuntimeException ex) {
-            throw new UssdFrameworkException("An error occured while getting "
+            throw new FrameworkException("An error occured while getting "
                     + "UssdMenu object.", ex);
         }
         if (menu == null) {
-            throw new UssdFrameworkException("UssdMenu object could not be found.");
+            throw new FrameworkException("UssdMenu object could not be found.");
         }
         return menu;
     }
@@ -232,11 +232,11 @@ public class UssdController {
             form = UssdUtils.unmarshallUssdForm(repr);            
         }
         catch (RuntimeException ex) {
-            throw new UssdFrameworkException("An error occured while getting "
+            throw new FrameworkException("An error occured while getting "
                     + "UssdForm object.", ex);
         }
         if (form == null) {
-            throw new UssdFrameworkException("UssdForm object could not be found.");
+            throw new FrameworkException("UssdForm object could not be found.");
         }
         return form;
     }

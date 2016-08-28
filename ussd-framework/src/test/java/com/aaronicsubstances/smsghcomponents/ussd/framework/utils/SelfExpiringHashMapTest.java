@@ -8,7 +8,7 @@ import org.junit.Test;
  *
  * @author Pierantonio Cangianiello
  */
-public class SelfExpiringHashMapTests {
+public class SelfExpiringHashMapTest {
 
     private final static int SLEEP_MULTIPLIER = 10;
 
@@ -27,6 +27,7 @@ public class SelfExpiringHashMapTests {
             2 * SLEEP_MULTIPLIER);
         map.put("a", "b");
         Thread.sleep(3 * SLEEP_MULTIPLIER);
+        map.put("c", "d");
         assertNull(map.get("a"));
     }
 

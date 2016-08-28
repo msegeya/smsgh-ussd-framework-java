@@ -3,17 +3,36 @@
  */
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  *
  * @author aaron
  */
 public class UssdRequest {
+    @SerializedName("Mobile")
     private String mobile;
+    
+    @SerializedName("SessionId")
     private String sessionId;
+    
+    @SerializedName("ServiceCode")
     private String serviceCode;
+    
+    @SerializedName("Type")
     private String type;
+    
+    @SerializedName("Message")
     private String message;
+    
+    @SerializedName("Operator")
     private String operator;
+    
+    @SerializedName("Sequence")
+    private int sequence;
+    
+    @SerializedName("ClientState")
+    private String clientState;
 
     public String getMobile() {
         return mobile;
@@ -62,6 +81,22 @@ public class UssdRequest {
     public void setOperator(String operator) {
         this.operator = operator;
     }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getClientState() {
+        return clientState;
+    }
+
+    public void setClientState(String clientState) {
+        this.clientState = clientState;
+    }
     
     public UssdRequest.Type getRequestType() {
         if (type == null) {
@@ -89,6 +124,14 @@ public class UssdRequest {
         }
         return message.trim();
     }
+
+    @Override
+    public String toString() {
+        return "UssdRequest{" + "mobile=" + mobile + ", sessionId=" + 
+                sessionId + ", serviceCode=" + serviceCode + ", type=" + 
+                type + ", message=" + message + ", operator=" + operator +
+                ", sequence=" + sequence + ", clientState=" + clientState + '}';
+    }    
     
     public static enum Type {
         INITIATION, RESPONSE, RELEASE, TIMEOUT

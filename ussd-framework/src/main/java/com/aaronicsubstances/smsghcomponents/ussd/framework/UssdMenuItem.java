@@ -13,18 +13,18 @@ public class UssdMenuItem {
     private String controller;
     private String action;
 
+    public UssdMenuItem(String index, String display, String action) {
+        this(index, display, action, null);
+    }
+    
     public UssdMenuItem(String index, String display, 
-            String controller, String action) {
+            String action, String controller) {
         if (index == null) {
             throw new IllegalArgumentException("\"index\" argument cannot "
                     + "be null");
         }
         if (display == null) {
             throw new IllegalArgumentException("\"display\" argument cannot "
-                    + "be null");
-        }
-        if (controller == null) {
-            throw new IllegalArgumentException("\"controller\" argument cannot "
                     + "be null");
         }
         if (action == null) {

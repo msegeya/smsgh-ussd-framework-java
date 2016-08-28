@@ -16,19 +16,12 @@ public class UssdInput {
     private String message;
     private ArrayList<Option> options;
     
-    public UssdInput(String name, String displayName) {
-        this(name, displayName, null);
-    }
-
-    public UssdInput(String name, String displayName, 
-            ArrayList<Option> options) {
+    public UssdInput(String name) {
         if (name == null) {
             throw new IllegalArgumentException("\"name\" argument cannot "
                     + "be null");
         }
         this.name = name;
-        this.displayName = displayName;
-        this.options = options;
     }
     
     public String render() {
@@ -106,6 +99,18 @@ public class UssdInput {
 
     public UssdInput options(ArrayList<Option> options) {
         this.options = options;
+        return this;
+    }
+    
+    public UssdInput addOption(Option option) {
+        if (option == null) {
+            throw new IllegalArgumentException("\"option\" argument cannot "
+                    + "be null");
+        }
+        if (options == null) {
+            options = new ArrayList<Option>();
+        }
+        options.add(option);
         return this;
     }
     

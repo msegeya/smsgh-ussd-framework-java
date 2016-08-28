@@ -48,12 +48,12 @@ public class UssdUtilsTest {
         Map<String, String> data = new HashMap<String, String>();
         data.put("s", "2");
         ArrayList<UssdInput> inputs = new ArrayList<UssdInput>();
-        inputs.add(new UssdInput("a", "dk"));
+        inputs.add(new UssdInput("a").displayName("dk"));
         ArrayList<UssdInput.Option> options = new ArrayList<UssdInput.Option>();
         options.add(new UssdInput.Option("d"));
         options.add(new UssdInput.Option("e"));
-        inputs.add(new UssdInput("n", "n", options));
-        UssdForm expected = new UssdForm(inputs, "c", "a", data);
+        inputs.add(new UssdInput("n").displayName("n").options(options));
+        UssdForm expected = new UssdForm("c", "a").inputs(inputs).data(data);
         
         String repr = UssdUtils.marshallUssdForm(expected);        
         UssdForm result = UssdUtils.unmarshallUssdForm(repr);
@@ -71,7 +71,7 @@ public class UssdUtilsTest {
         ArrayList<UssdMenuItem> items = new  ArrayList<UssdMenuItem>();
         items.add(new UssdMenuItem("i", "dkdk", "con", "dl"));
         items.add(new UssdMenuItem("i1", "dkdk", "con1", "dl1"));
-        UssdMenu expected = new UssdMenu(items, "Header");
+        UssdMenu expected = new UssdMenu().items(items).header("Header");
         
         String repr = UssdUtils.marshallUssdMenu(expected);        
         UssdMenu menu2 = UssdUtils.unmarshallUssdMenu(repr);

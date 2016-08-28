@@ -31,6 +31,7 @@ public class UssdContext {
         }
         this.store = store;
         this.request = request;
+        this.controllerPackages = controllerPackages;
         this.controllerData = controllerData;
         this.dataBag = new UssdDataBag(store, getDataBagKey());
     }
@@ -60,11 +61,11 @@ public class UssdContext {
     public UssdResponse sessionExecuteAction() {
         String route = store.getValue(getNextRouteKey());
         if (route == null) {
-            throw new UssdFrameworkException("No route was found.");
+            throw new FrameworkException("No route was found.");
         }
         int periodIndex = route.lastIndexOf('.');
         if (periodIndex == -1) {
-            throw new UssdFrameworkException("Invalid route format. "
+            throw new FrameworkException("Invalid route format. "
                     + "Must be \"SomeController.action\"." +
                 "Current route is: " + route);
         }
@@ -74,13 +75,7 @@ public class UssdContext {
         try {
             controllerClass = Class.forName(controllerName);
         }
-        catch (ClassNotFoundException ex) { 
-            boolean packagesMayHelp = controllerName.indexOf('.') == -1;
-            if (!packagesMayHelp) {
-                throw new RuntimeException('"'+ controllerName + "\" " + 
-                        "class could not be found.");
-            }
-        }
+        catch (ClassNotFoundException ex) { }
         if (controllerClass == null) {
             StringBuilder attemptedClasses = new StringBuilder();
             attemptedClasses.append(' ').append(controllerName);

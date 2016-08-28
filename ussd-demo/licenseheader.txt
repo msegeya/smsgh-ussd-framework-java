@@ -1,0 +1,7 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix} (c) 2016. Aaronic Substances
+<#if licenseLast??>
+${licenseLast}
+</#if>

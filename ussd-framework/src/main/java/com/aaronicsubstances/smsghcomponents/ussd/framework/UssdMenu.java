@@ -15,17 +15,8 @@ public class UssdMenu {
     private String message;
     private ArrayList<UssdMenuItem> items;
 
-    public UssdMenu(ArrayList<UssdMenuItem> items) {
-        this(items, null);
-    }
-
-    public UssdMenu(ArrayList<UssdMenuItem> items, String header) {
-        if (items == null) {
-            throw new IllegalArgumentException("\"items\" argument cannot "
-                    + "be null");
-        }
-        this.items = items;
-        this.header = header;
+    public UssdMenu() {
+        this.items = new ArrayList<UssdMenuItem>();
     }
 
     public String getHeader() {
@@ -65,6 +56,27 @@ public class UssdMenu {
                     + "null");
         }
         this.items = items;
+        return this;
+    }
+    
+    public UssdMenu addItem(UssdMenuItem item) {
+        if (item == null) {
+            throw new IllegalArgumentException("\"items\" argument cannot "
+                    + "be null");
+        }
+        items.add(item);
+        return this;
+    }
+    
+    public UssdMenu addItem(String displayName, String action) {
+        return addItem(displayName, action, null);
+    }
+    
+    public UssdMenu addItem(String displayName, String action,
+            String controller) {
+        String index = String.valueOf(items.size() + 1);
+        UssdMenuItem item = new UssdMenuItem(index, displayName, action);
+        items.add(item);
         return this;
     }
     

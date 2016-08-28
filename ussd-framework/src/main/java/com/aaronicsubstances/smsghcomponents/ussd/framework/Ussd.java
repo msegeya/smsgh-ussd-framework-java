@@ -1,12 +1,12 @@
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
-import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
 public class Ussd {
     public static final int MAX_REDIRECT_COUNT = 10;
@@ -52,9 +52,7 @@ public class Ussd {
         if (!request.getMethod().equalsIgnoreCase("POST")) {
             return false;
         }
-        byte[] ussdRequestJsonBytes = ByteStreams.toByteArray(
-                request.getInputStream());
-        String ussdRequestJson = new String(ussdRequestJsonBytes,
+        String ussdRequestJson = IOUtils.toString(request.getInputStream(),
                 "utf-8");
         Gson gson = new Gson();
         UssdRequest ussdRequest = gson.fromJson(ussdRequestJson, 
@@ -151,7 +149,7 @@ public class Ussd {
             boolean exists = context.sessionExists();
             if (!exists)
             {
-                throw new RuntimeException("Session does not exist.");
+                throw new SessionNotFoundException("Session does not exist.");
             }
             response = context.sessionExecuteAction();
             if (!response.isRelease())

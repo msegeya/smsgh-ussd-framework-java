@@ -3,13 +3,24 @@
  */
 package com.aaronicsubstances.smsghcomponents.ussd.framework;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  *
  * @author aaron
  */
 public class UssdResponse {
+    private static final String RESPONSE_TYPE_RESPONSE = "Response";
+    
+    private static final String RESPONSE_TYPE_RELEASE = "Release";
+    
+    @SerializedName("Type")
     private String type;
+    
+    @SerializedName("Message")
     private String message;
+    
+    @SerializedName("ClientState")
     private String clientState;
     
     private transient Throwable exception;
@@ -74,8 +85,8 @@ public class UssdResponse {
     
     public static UssdResponse render(String message, String nextRoute) {
         String type = nextRoute == null
-                ? UssdResponseTypes.RELEASE.toString()
-                : UssdResponseTypes.RESPONSE.toString();
+                ? RESPONSE_TYPE_RELEASE
+                : RESPONSE_TYPE_RESPONSE;
         UssdResponse response = new UssdResponse();
         response.setType(type);
         response.setMessage(message);
@@ -89,8 +100,10 @@ public class UssdResponse {
         response.setRedirect(true);
         return response;
     }
-    
-    public static enum UssdResponseTypes {
-        RESPONSE, RELEASE,
+
+    @Override
+    public String toString() {
+        return "UssdResponse{" + "type=" + type + ", message=" 
+                + message + ", clientState=" + clientState + '}';
     }
 }

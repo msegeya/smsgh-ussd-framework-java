@@ -74,7 +74,6 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public int size() {
-        //cleanup();
         return internalMap.size();
     }
 
@@ -83,7 +82,6 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean isEmpty() {
-        //cleanup();
         return internalMap.isEmpty();
     }
 
@@ -92,7 +90,6 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
-        //cleanup();
         return internalMap.containsKey((K) key);
     }
 
@@ -101,13 +98,11 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsValue(Object value) {
-        //cleanup();
         return internalMap.containsValue((V) value);
     }
 
     @Override
     public V get(Object key) {
-        //cleanup();
         renewKey((K) key);
         return internalMap.get((K) key);
     }
@@ -124,7 +119,7 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
      * {@inheritDoc}
      */
     public V put(K key, V value, long lifeTimeMillis) {
-        cleanup();
+        cleanUp();
         ExpiringKey delayedKey = new ExpiringKey(key, lifeTimeMillis);
         ExpiringKey oldKey = expiringKeys.put((K) key, delayedKey);
         if(oldKey != null) {
@@ -168,7 +163,7 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
     private void expireKey(ExpiringKey<K> delayedKey) {
         if (delayedKey != null) {
             delayedKey.expire();
-            cleanup();
+            cleanUp();
         }
     }
 
@@ -206,7 +201,7 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
         throw new UnsupportedOperationException();
     }
 
-    private void cleanup() {
+    public void cleanUp() {
         ExpiringKey<K> delayedKey = delayQueue.poll();
         while (delayedKey != null) {
             internalMap.remove(delayedKey.getKey());
@@ -215,7 +210,7 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
         }
     }
 
-    private class ExpiringKey<K> implements Delayed {
+    private static class ExpiringKey<K> implements Delayed {
 
         private long startTime = System.currentTimeMillis();
         private final long maxLifeTimeMillis;
