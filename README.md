@@ -25,7 +25,7 @@ This project was built with Apache Maven 3.3.9.
 
 ### Installation
 
-Download the [zip distribution](h) and copy the ussd-framework-*.jar and its dependent jars in the lib folder to the appropriate
+Download the [zip distribution](h) and copy the ussd-framework-*.jar and its dependent jars in the libs folder to the appropriate
 class paths on your system, depending on your build environment.
 
 ### Setup
