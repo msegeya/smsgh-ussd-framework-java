@@ -27,7 +27,6 @@ This project was built with Apache Maven 3.3.9.
 
 Download the [zip distribution](h) and copy the ussd-framework-*.jar and its dependent jars in the lib folder to the appropriate
 class paths on your system, depending on your build environment.
-```
 
 ### Setup
 
@@ -36,6 +35,8 @@ To process USSD requests, create a `Ussd` instance and call its `service` method
 Here is a sample setup in a Java servlet.
 
 ```java
+...
+
 public class UssdServlet extends HttpServlet {
     
     @Override
@@ -65,6 +66,8 @@ Next we create our `MainController` which extends `UssdController`.
 
 ```java
 package com.smsgh.ussd.demo.controllers;
+
+...
 
 public class MainController extends UssdController {
     
