@@ -5,7 +5,7 @@
     <groupId>com.smsgh</groupId>
     <artifactId>ussd-demo</artifactId>
     <packaging>war</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     
     <name>SMSGH Ussd Demo</name>
     <url>http://maven.apache.org</url>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.smsgh</groupId>
             <artifactId>ussd-framework</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -50,7 +50,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <build>
-        <finalName>ussd-demo</finalName>
-    </build>
 </project>
