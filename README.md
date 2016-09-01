@@ -52,17 +52,11 @@ public class UssdServlet extends HttpServlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
         Ussd ussd = new Ussd()
-                .initiationController("Main")
-                .initiationAction("start");
-
-        ussd.controllerPackages(new String[]{
-            "com.smsgh.ussd.demo.controllers"
-        });
-        
-        boolean handled = ussd.service(req, resp);
-        if (!handled) {
-            super.service(req, resp);
-        }
+                .controllerPackages(new String[]{"com.smsgh.ussd.demo"})
+                .initiationController("controllers.Main")
+                .initiationAction("start")
+                .maxAutoDialDepth(5);        
+        ussd.service(req, resp);
     }
 }
 ```

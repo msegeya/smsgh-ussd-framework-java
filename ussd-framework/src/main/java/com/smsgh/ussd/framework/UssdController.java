@@ -129,7 +129,7 @@ public class UssdController {
         String repr = UssdUtils.marshallUssdMenu(ussdMenu);
         dataBag.set(MENU_PROCESSOR_DATA_KEY, repr);
         String message = ussdMenu.render();
-        return render(message, "menuProcessor");
+        return render(message, "menuProcessor", autoDialOn);
     }
     
     
@@ -145,7 +145,7 @@ public class UssdController {
         String repr = UssdUtils.marshallUssdForm(form);
         dataBag.set(FORM_PROCESSOR_DATA_KEY, repr);
         String message = form.render();
-        return render(message, "formProcessor");
+        return render(message, "formProcessor", autoDialOn);
     }
     
     public UssdResponse menuProcessor() {
