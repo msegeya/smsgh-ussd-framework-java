@@ -6,8 +6,21 @@ package com.smsgh.ussd.framework;
 import java.util.ArrayList;
 
 /**
- *
- * @author aaron
+ * Used to display menus in ussd apps.
+ * <p>
+ * A menu presents the ussd app user with choices, usually numbered choices.
+ * E.g.
+ * <p>
+ * Select fruit:
+ * <ol>
+ *  <li>Apple
+ *  <li>Banana
+ *  <li>Pawpaw
+ * </ol>
+ * To act on the user's choice, one supplies {@link UssdMenuItem} instances
+ * which contain the controller and action to call for a given choice.
+ * 
+ * @author Aaron Baffour-Awuah
  */
 public class UssdMenu {
     private String header;
@@ -15,41 +28,88 @@ public class UssdMenu {
     private String message;
     private ArrayList<UssdMenuItem> items;
 
+    /**
+     * Creates a new instance with an empty list of
+     * {@link UssdMenuItem} instances.
+     */
     public UssdMenu() {
         this.items = new ArrayList<UssdMenuItem>();
     }
 
+    /**
+     * Gets the menus' header.
+     * @return menu's header or null if menu will be displayed without a 
+     * header.
+     */
     public String getHeader() {
         return header;
     }
 
+    /**
+     * Sets the menu's header.
+     * @param header menu's header. Can be null.
+     * @return this instance to enable chaining of property mutators.
+     */
     public UssdMenu header(String header) {
         this.header = header;
         return this;
     }
 
+    /**
+     * Gets the menu's footer.
+     * @return menu's footer or null if menu will be displayed without a 
+     * footer.
+     */
     public String getFooter() {
         return footer;
     }
 
+    /**
+     * Sets the menu's footer.
+     * @param footer  menu's footer. Can be null.
+     * @return this instance to enable chaining of property mutators.
+     */
     public UssdMenu footer(String footer) {
         this.footer = footer;
         return this;
     }
 
+    /**
+     * Gets the message which will be used to render the entire menu.
+     * @return entire menu's representation or null to use the default
+     * way of rendering menus.
+     * @see #message(java.lang.String) 
+     */
     public String getMessage() {
         return message;
     }
 
+    /**
+     * Hook for clients to override how a menus is displayed.
+     * @param message the message which will be used to render the entire 
+     * menu and skip the default of using headers, menu items and footers. Can
+     * be null to indicate that the default way be used.
+     * @return this instance to enable chaining of property mutators.
+     */
     public UssdMenu message(String message) {
         this.message = message;
         return this;
     }
 
+    /**
+     * Gets the list of menu items.
+     * @return menu items.
+     */
     public ArrayList<UssdMenuItem> getItems() {
         return items;
     }
 
+    /**
+     * Sets the list of menu items.
+     * @param items menu items
+     * @return this to enable chaining of mutator methods.
+     * @exception java.lang.IllegalArgumentException if items is null.
+     */
     public UssdMenu items(ArrayList<UssdMenuItem> items) {
         if (items == null) {
             throw new IllegalArgumentException("\"items\" argument cannot be "
@@ -59,9 +119,14 @@ public class UssdMenu {
         return this;
     }
     
+    /**
+     * 
+     * @param item
+     * @return 
+     */
     public UssdMenu addItem(UssdMenuItem item) {
         if (item == null) {
-            throw new IllegalArgumentException("\"items\" argument cannot "
+            throw new IllegalArgumentException("\"item\" argument cannot "
                     + "be null");
         }
         items.add(item);
@@ -105,7 +170,7 @@ public class UssdMenu {
         return messageBuilder.toString();
     }
     
-    // Used during testing.
+    // The three methods below help with testing.
 
     @Override
     public int hashCode() {

@@ -682,7 +682,7 @@ public class Ussd  {
                 ussdRequest.setType(UssdRequest.REQUEST_TYPE_RESPONSE);
                 ussdRequest.setClientState(ussdResponse.getClientState());
                 ussdRequest.setMessage(nextMessage);
-                ussdRequest.setAutoDialOriginated(true);
+                ussdRequest.setAutoDialIndex(i+1);
                 ussdResponse = processContinuationRequest(context);
                 if (ussdResponse.isRelease() || !ussdResponse.isAutoDialOn()) {
                     break;

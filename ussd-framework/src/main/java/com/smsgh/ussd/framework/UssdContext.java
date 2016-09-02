@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  *
- * @author aaron
+ * @author Aaron Baffour-Awuah
  */
 public class UssdContext {
     private SessionStore store;

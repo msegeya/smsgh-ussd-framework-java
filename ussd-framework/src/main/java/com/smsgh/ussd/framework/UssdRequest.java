@@ -43,7 +43,7 @@ public class UssdRequest {
     @SerializedName("ClientState")
     private String clientState;
     
-    private transient boolean autoDialOriginated = false;
+    private transient int autoDialIndex;
     
     public static UssdRequest fromJson(String json) {
         Gson gson = new Gson();
@@ -51,12 +51,12 @@ public class UssdRequest {
         return instance;
     }
 
-    public boolean isAutoDialOriginated() {
-        return autoDialOriginated;
+    public int getAutoDialIndex() {
+        return autoDialIndex;
     }
 
-    public void setAutoDialOriginated(boolean autoDialOriginated) {
-        this.autoDialOriginated = autoDialOriginated;
+    public void setAutoDialIndex(int autoDialIndex) {
+        this.autoDialIndex = autoDialIndex;
     }
 
     public String getMobile() {
@@ -136,6 +136,6 @@ public class UssdRequest {
                 sessionId + ", serviceCode=" + serviceCode + ", type=" + 
                 type + ", message=" + message + ", operator=" + operator + 
                 ", sequence=" + sequence + ", clientState=" + clientState + 
-                ", autoDialOriginated=" + autoDialOriginated + '}';
+                ", autoDialIndex=" + autoDialIndex + '}';
     }    
 }

@@ -3,6 +3,7 @@
  */
 package com.smsgh.ussd.framework.utils;
 
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,14 +36,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class SelfExpiringHashMap<K, V> implements Map<K, V> {
 
-    private final Map<K, V> internalMap;
+    final Map<K, V> internalMap;
 
-    private final Map<K, ExpiringKey<K>> expiringKeys;
+    final Map<K, ExpiringKey<K>> expiringKeys;
 
     /**
      * Holds the map keys using the given life time for expiration.
      */
-    private final DelayQueue<ExpiringKey> delayQueue = new DelayQueue<ExpiringKey>();
+    final DelayQueue<ExpiringKey> delayQueue = new DelayQueue<ExpiringKey>();
 
     /**
      * The default max life time in milliseconds.
@@ -298,6 +299,15 @@ public class SelfExpiringHashMap<K, V> implements Map<K, V> {
         public int compareTo(Delayed that) {
             return Long.compare(this.getDelayMillis(), 
                     ((ExpiringKey) that).getDelayMillis());
+        }
+
+        @Override
+        public String toString() {
+            return "ExpiringKey{" + "startTime=" + 
+                    DateFormat.getTimeInstance(DateFormat.SHORT)
+                .format(startTime) + ", "
+                    + "maxLifeTimeMillis=" + maxLifeTimeMillis + ", key=" + 
+                    key + '}';
         }
     }
 }
