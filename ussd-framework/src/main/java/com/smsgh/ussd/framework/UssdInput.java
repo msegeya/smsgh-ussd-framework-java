@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author aaron
+ * @author Aaron Baffour-Awuah
  */
 public class UssdInput {
     private String name;
@@ -41,7 +41,7 @@ public class UssdInput {
             for (int i = 0; i < options.size(); i++) {
                 Option option = options.get(i);
                 if (option == null) {
-                    throw new RuntimeException("Encountered null "
+                    throw new FrameworkException("Encountered null "
                             + "form input option at index " + i);
                 }
                 messageBuilder.append(i+1).append(". ").append(option.display);
@@ -139,8 +139,11 @@ public class UssdInput {
             this.value = value;
         }
         
-        // Used during testing.
+        // 3 methods below are used during testing.
 
+        /**
+         * @inheritDoc 
+         */
         @Override
         public int hashCode() {
             int hash = 3;
@@ -149,6 +152,9 @@ public class UssdInput {
             return hash;
         }
 
+        /**
+         * @inheritDoc 
+         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
@@ -172,14 +178,20 @@ public class UssdInput {
             return true;
         }
 
+        /**
+         * @inheritDoc 
+         */
         @Override
         public String toString() {
             return "Option{" + "display=" + display + ", value=" + value + '}';
         }
     }
     
-    // Used during testing.
+    // 3 methods below are used during testing.
 
+    /**
+     * @inheritDoc 
+     */
     @Override
     public int hashCode() {
         int hash = 5;
@@ -191,6 +203,9 @@ public class UssdInput {
         return hash;
     }
 
+    /**
+     * @inheritDoc 
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -226,6 +241,9 @@ public class UssdInput {
         return true;
     }
 
+    /**
+     * @inheritDoc 
+     */
     @Override
     public String toString() {
         return "UssdInput{" + "name=" + name + ", displayName=" + 

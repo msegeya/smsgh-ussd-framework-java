@@ -640,6 +640,10 @@ public class Ussd  {
      */
     private UssdResponse processInitiationRequest(UssdContext context, 
             String route) {
+        // Clear any existing session for phone number, in to conform
+        // to UssdContext.getDataBagKey() implementation of using
+        // phone numbers rather than sessionIds.
+        context.sessionClose();
         context.sessionSetNextRoute(route);
         UssdResponse ussdResponse = processContinuationRequest(context);
         if (maxAutoDialDepth > 0 && ussdResponse.isAutoDialOn() &&
@@ -682,7 +686,8 @@ public class Ussd  {
                 ussdRequest.setType(UssdRequest.REQUEST_TYPE_RESPONSE);
                 ussdRequest.setClientState(ussdResponse.getClientState());
                 ussdRequest.setMessage(nextMessage);
-                ussdRequest.setAutoDialIndex(i+1);
+                ussdRequest.setAutoDialOriginated(true);
+                ussdRequest.setAutoDialIndex(i);
                 ussdResponse = processContinuationRequest(context);
                 if (ussdResponse.isRelease() || !ussdResponse.isAutoDialOn()) {
                     break;

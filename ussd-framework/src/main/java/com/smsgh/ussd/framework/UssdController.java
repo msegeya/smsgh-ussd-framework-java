@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Base class for classes which handle USSD requests.
+ * Base class for controller classes which handle USSD requests. All controllers
+ * must subclass this class.
  * <p>
- * Provide convenience methods for displaying menus and forms in
+ * Provides convenience methods for displaying menus and forms in
  * ussd apps.
  * 
  * @author Aaron Baffour-Awuah
@@ -167,38 +168,78 @@ public abstract class UssdController {
     }
     
     /**
-     * Constructs a response which sends a session-terminating
-     * message to the app user.
+     * Constructs a session-terminating ussd response.
      * 
      * @param message the session-terminating message.
      * 
-     * @return response to end session.
+     * @return ussd response to end session.
      */
     public UssdResponse render(String message) {
         return render(message, null, null);
     }
     
+    /**
+     * Constructs a ussd response which continues session by invoking
+     * an action on the subclass calling this method. Action is actually
+     * invoked when the next ussd request comes in from the telcos.
+     * 
+     * @param message the ussd response message
+     * @param action the action to call in response to the next ussd
+     * request. If null, then session will be terminated.
+     * @return ussd response to continue session (unless action is null).
+     */
     public UssdResponse render(String message, String action) {
         return render(message, action, null);
     }
     
+    /**
+     * Constructs a ussd response which continues session by invoking
+     * an action on the subclass calling this method. Action is actually
+     * invoked when the next ussd request comes in from the telcos.
+     * 
+     * @param message the ussd response message
+     * @param action the action to call in response to the next ussd
+     * request. If null, then session will be terminated.
+     * @param autoDialOn true (by default) to continue any ongoing auto 
+     * dial processing; false to end it.
+     * @return ussd response to continue session (unless action is null).
+     */
     public UssdResponse render(String message, String action, 
             boolean autoDialOn) {
         return render(message, action, null, autoDialOn);
     }
     
+    /**
+     * Constructs a ussd response which continues session by invoking
+     * an action on the given controller. Action is actually
+     * invoked when the next ussd request comes in from the telcos.
+     * 
+     * @param message the ussd response message
+     * @param action the action to call in response to the next ussd
+     * request. If null, then session will be terminated.
+     * @param controller the controller whose action will be called. If
+     * null, then the subclass calling this method will be used.
+     * @return ussd response to continue session (unless action is null).
+     */
     public UssdResponse render(String message, String action,
             String controller) {
         return render(message, action, controller, true);
     }
     
     /**
+     * Constructs a ussd response which continues session by invoking
+     * an action on the given controller. Action is actually
+     * invoked when the next ussd request comes in from the telcos
+     * (telecommunications networks).
      * 
-     * @param message
-     * @param action
-     * @param controller
-     * @param autoDialOn
-     * @return 
+     * @param message the ussd response message
+     * @param action the action to call in response to the next ussd
+     * request. If null, then session will be terminated.
+     * @param controller the controller whose action will be called. If
+     * null, then the subclass calling this method will be used.
+     * @param autoDialOn true (by default) to continue any ongoing auto 
+     * dial processing; false to end it.
+     * @return ussd response to continue session (unless action is null).
      */
     public UssdResponse render(String message, String action,
             String controller, boolean autoDialOn) {
@@ -212,10 +253,22 @@ public abstract class UssdController {
         return ussdResponse;
     }
     
+    /**
+     * Constructs a ussd response out of a menu.
+     * @param ussdMenu the menu.
+     * @return ussd response from menu.
+     */
     public UssdResponse renderMenu(UssdMenu ussdMenu) {
         return renderMenu(ussdMenu, true);
     }
     
+    /**
+     * Constructs a ussd response out of a menu.
+     * @param ussdMenu the menu.
+     * @param autoDialOn true (by default) to continue any ongoing auto 
+     * dial processing; false to end it.
+     * @return ussd response from menu.
+     */
     public UssdResponse renderMenu(UssdMenu ussdMenu, boolean autoDialOn) {
         if (ussdMenu == null) {
             throw new IllegalArgumentException("\"ussdMenu\" argument cannot "
@@ -227,11 +280,22 @@ public abstract class UssdController {
         return render(message, "menuProcessor", autoDialOn);
     }
     
-    
+    /**
+     * Constructs a ussd response out of a form.
+     * @param form the form
+     * @return ussd response from form.
+     */
     public UssdResponse renderForm(UssdForm form) {
         return renderForm(form, true);
     }
     
+    /**
+     * Constructs a ussd response out of a form.
+     * @param form the form
+     * @param autoDialOn true (by default) to continue any ongoing auto 
+     * dial processing; false to end it.
+     * @return ussd response from form.
+     */
     public UssdResponse renderForm(UssdForm form, boolean autoDialOn) {
         if (form == null) {
             throw new IllegalArgumentException("\"form\" argument cannot "
@@ -244,7 +308,7 @@ public abstract class UssdController {
     }
     
     /**
-     * Processes menus. Handles invalid menu choices.
+     * Internal to framework, for processing menus. Handles invalid menu choices.
      * 
      * @return appropriate response depending on selected menu
      * choice. Redisplays menu if selected menu choice is invalid.
@@ -288,7 +352,7 @@ public abstract class UssdController {
     }
     
     /**
-     * Processes forms. Handles invalid form options.
+     * Internal to framework, for processing forms. Handles invalid form options.
      * 
      * @return appropriate response depending on stage of form processing.
      * If form processing is done, returns response that calls the action

@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Used to display menus in ussd apps.
  * <p>
  * A menu presents the ussd app user with choices, usually numbered choices.
- * E.g.
+ * e.g.
  * <p>
  * Select fruit:
  * <ol>
@@ -120,9 +120,10 @@ public class UssdMenu {
     }
     
     /**
-     * 
-     * @param item
-     * @return 
+     * Adds a new menu item to the existing menu item list.
+     * @param item new menu item.
+     * @return this instance to enable chaining of mutator methods.
+     * @exception java.lang.IllegalArgumentException if item is null.
      */
     public UssdMenu addItem(UssdMenuItem item) {
         if (item == null) {
@@ -133,10 +134,33 @@ public class UssdMenu {
         return this;
     }
     
+    /**
+     * Creates and adds a new menu item, giving it an index of 1 more than
+     * the size of the current menu item list.
+     * @param displayName the text of the menu item.
+     * @param action the action to call when the menu is selected. The action
+     * will be called from the controller which renders the menu instance 
+     * via {@link #render()}
+     * @return this instance to enable chaining of mutator methods.
+     * @exception java.lang.IllegalArgumentException if displayName or
+     * action is null.
+     */
     public UssdMenu addItem(String displayName, String action) {
         return addItem(displayName, action, null);
     }
     
+    /**
+     * Creates and adds a new menu item, giving it an index of 1 more than
+     * the size of the current menu item list.
+     * @param displayName the text of the menu item.
+     * @param action  the action to call when the menu is selected.
+     * @param controller the controller the action argument belongs to. If
+     * null, then the action will be called from the controller which renders 
+     * the menu instance via {@link #render()}
+     * @return this instance to enable chaining of mutator methods.
+     * @exception java.lang.IllegalArgumentException if displayName or
+     * action is null.
+     */
     public UssdMenu addItem(String displayName, String action,
             String controller) {
         String index = String.valueOf(items.size() + 1);
@@ -145,6 +169,15 @@ public class UssdMenu {
         return this;
     }
     
+    /**
+     * Generates the ussd response message to be sent for the
+     * menu instance. 
+     * <p>
+     * If the message property is not null, it is returned
+     * immediately. Otherwise, the header, footer and menu item list are
+     * combined to generate the message.
+     * @return ussd response message.
+     */
     public String render() {
         if (message != null) {
             return message;
@@ -157,7 +190,7 @@ public class UssdMenu {
         for (int i = 0; i < items.size(); i++) {
             UssdMenuItem item = items.get(i);
             if (item == null) {
-                throw new RuntimeException("Encountered null menu item at "
+                throw new FrameworkException("Encountered null menu item at "
                         + "index " +i);
             }
             messageBuilder.append(item.getIndex());
@@ -172,6 +205,9 @@ public class UssdMenu {
     
     // The three methods below help with testing.
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public int hashCode() {
         int hash = 5;
@@ -182,6 +218,9 @@ public class UssdMenu {
         return hash;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -213,6 +252,9 @@ public class UssdMenu {
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public String toString() {
         return "UssdMenu{" + "header=" + header + ", footer=" + footer +

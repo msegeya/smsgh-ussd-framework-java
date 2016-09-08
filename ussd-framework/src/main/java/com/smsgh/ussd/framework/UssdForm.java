@@ -8,8 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
- * @author aaron
+ * Used to gather data from the ussd app user, for subsequent processing.
+ * <p>
+ * The data are gathered using one or more {@link UssdInput} screens. The
+ * ussd app user is guided through each screen, and then after the last one
+ * is filled, an action is invoked to fetch that data using the
+ * {@link UssdController#getFormData()} method, after which it may now begin
+ * processing.
+ * 
+ * @author Aaron Baffour-Awuah
  */
 public class UssdForm {
     private ArrayList<UssdInput> inputs;
@@ -18,6 +25,10 @@ public class UssdForm {
     private String action;
     private Map<String, String> data;
     
+    /**
+     * 
+     * @param action 
+     */
     public UssdForm(String action) {
         this(action, null);
     }
@@ -102,20 +113,23 @@ public class UssdForm {
     public String render() {
         if (processingPosition < 0 || processingPosition >=
                 inputs.size()) {
-            throw new RuntimeException(String.format("Invalid processing "
+            throw new FrameworkException(String.format("Invalid processing "
                     + "position (%d) for inputs of size %d",
                     processingPosition, inputs.size()));
         }
         UssdInput currentInput = inputs.get(processingPosition);
         if (currentInput == null) {
-            throw new RuntimeException("Encountered null form input at index " +
+            throw new FrameworkException("Encountered null form input at index " +
                     processingPosition);
         }
         return currentInput.render();
     }
     
-    // Used during testing.
+    // The three methods below are used during testing.
 
+    /**
+     * @inheritDoc 
+     */
     @Override
     public int hashCode() {
         int hash = 3;
@@ -127,6 +141,9 @@ public class UssdForm {
         return hash;
     }
 
+    /**
+     * @inheritDoc 
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -157,6 +174,9 @@ public class UssdForm {
         return true;
     }
 
+    /**
+     * @inheritDoc 
+     */
     @Override
     public String toString() {
         return "UssdForm{" + "inputs=" + inputs + ", processingPosition=" + 

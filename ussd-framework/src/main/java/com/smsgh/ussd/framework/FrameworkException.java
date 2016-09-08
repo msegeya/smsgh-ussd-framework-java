@@ -4,8 +4,9 @@
 package com.smsgh.ussd.framework;
 
 /**
- *
- * @author aaron
+ * Base class of exceptions thrown from framework code.
+ * 
+ * @author Aaron Baffour-Awuah
  */
 public class FrameworkException extends RuntimeException {
 

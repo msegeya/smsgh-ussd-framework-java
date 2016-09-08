@@ -39,6 +39,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized String getHashValue(String name, String key) {        
         if (backingStore.containsKey(name)) {
             Map<String, String> hash = 
@@ -51,6 +52,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized void setHashValue(String name, String key, String value) {
         Map<String, String> hash;
         if (backingStore.containsKey(name)) {
@@ -66,6 +68,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized boolean hashExists(String name) {
         return backingStore.containsKey(name);
     }
@@ -73,6 +76,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized boolean hashValueExists(String name, String key) {
         if (backingStore.containsKey(name)) {
             Map<String, String> hash = 
@@ -85,6 +89,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized void deleteHash(String name) {
         backingStore.remove(name);
     }
@@ -92,6 +97,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized void deleteHashValue(String name, String key) {
         if (backingStore.containsKey(name)) {
             Map<String, String> hash = 
@@ -105,6 +111,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized void setValue(String key, String value) {
         backingStore.put(key, value);
     }
@@ -112,6 +119,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized String getValue(String key) {
         return (String)backingStore.get(key);
     }
@@ -119,6 +127,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized boolean valueExists(String key) {
         return backingStore.containsKey(key);
     }
@@ -126,6 +135,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      *{@inheritDoc} 
      */
+    @Override
     public synchronized void deleteValue(String key) {
         backingStore.remove(key);
     }    
@@ -133,6 +143,7 @@ public class InMemorySessionStore implements SessionStore {
     /**
      * Does nothing.
      */
+    @Override
     public void close() {
     }
 }

@@ -5,9 +5,12 @@ package com.smsgh.ussd.framework;
 
 /**
  *
- * @author aaron
+ * Exception thrown when a session is not found for a ussd continuation
+ * message.
+ * 
+ * @author Aaron Baffour-Awuah
  */
-public class SessionNotFoundException extends RuntimeException {
+public class SessionNotFoundException extends FrameworkException {
 
     /**
      * Creates a new instance of <code>SessionNotFoundException</code> without

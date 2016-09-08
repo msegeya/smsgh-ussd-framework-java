@@ -56,7 +56,6 @@ public class MainController extends UssdController {
             greeting = "Good night";
         }        
         
-        // formData will be null if previous screen was not a UssdForm
         Map<String, String> formData = getFormData();
         
         String name = formData.get("Name");

@@ -9,7 +9,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
- *
+ * Class internal to framework, which is responsible for
+ * creating a controller instance and calling upon one of its action
+ * methods to process a ussd request and return a ussd response.
+ * 
  * @author Aaron Baffour-Awuah
  */
 public class UssdContext {
@@ -52,7 +55,7 @@ public class UssdContext {
      * @return key under which next route is kept. 
      */
     public String getNextRouteKey() {
-        return String.format("%s.%s", request.getSessionId(), "NextRoute");
+        return String.format("%s.%s", request.getMobile(), "NextRoute");
     }
     
     /**
@@ -62,7 +65,7 @@ public class UssdContext {
      * @return key for session's data bag.
      */
     public String getDataBagKey() {
-        return String.format("%s.%s", request.getSessionId(), "DataBag");
+        return String.format("%s.%s", request.getMobile(), "DataBag");
     }
 
     /**

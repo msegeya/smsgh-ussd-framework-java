@@ -49,7 +49,7 @@ public class UssdServlet extends HttpServlet {
                 .controllerPackages(new String[]{"com.smsgh.ussd.demo"})
                 .initiationController("controllers.Main")
                 .initiationAction("start")
-                .maxAutoDialDepth(5);        
+                .maxAutoDialDepth(Integer.MAX_VALUE);        
         ussd.service(req, resp);
     }    
 }
