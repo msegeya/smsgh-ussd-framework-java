@@ -132,4 +132,4 @@ public class MainController extends UssdController {
 
 And that's it!
 
-See [ussd-demo](http://gitlab.smsgh.com/aaron/smsgh-ussd-framework-java/tree/master/ussd-demo) folder in source for full sample source code.
+See [ussd-demo](https://github.com/smsgh/smsgh-ussd-framework-java/tree/master/ussd-demo) folder in source for full sample source code.
