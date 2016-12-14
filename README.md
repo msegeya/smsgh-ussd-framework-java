@@ -24,13 +24,13 @@ This project was built with JDK 8, Apache Maven 3.3 and NetBeans IDE 8, and test
 
 ## Run The Demo
 
-Included in this repository is a build of a sample web app demonstrating the basic features provided by the framework. To try it out, download the [ussd-demo WAR file](http://gitlab.smsgh.com/aaron/smsgh-ussd-framework-java/tree/master/ussd-demo-1.0.war) and deploy it to your servlet container of choice (if using Tomcat using the manager app is an easy way to deploy a WAR file).
+Included in this repository is a build of a sample web app demonstrating the basic features provided by the framework. To try it out, download the [ussd-demo WAR file](https://github.com/smsgh/smsgh-ussd-framework-java/raw/master/ussd-demo-1.0.war) and deploy it to your servlet container of choice (if using Tomcat using the manager app is an easy way to deploy a WAR file).
 
 You can then test it locally using [USSD Simulator](http://apps.smsgh.com/UssdSimulator/) or [USSD Mocker](https://github.com/smsgh/ussd-mocker), by pointing them to the endpoint [http://localhost:8080/ussd-demo-1.0/ussd](http://localhost:8080/ussd-demo-1.0/ussd) (the servlet path is __/ussd__). Modify the port if running locally on a different port from *8080*. Modify the context path also if different from */ussd-demo-1.0*.
 
 ## Installation
 
-Download the [zip distribution](http://gitlab.smsgh.com/aaron/smsgh-ussd-framework-java/tree/master/ussd-framework-1.0-dist.zip) and copy the ussd-framework-*.jar (currently ussd-framework-1.0.jar) and its dependent jars in the lib folder to the appropriate
+Download the [zip distribution](https://github.com/smsgh/smsgh-ussd-framework-java/raw/master/ussd-framework-1.0-dist.zip) and copy the ussd-framework-*.jar (currently ussd-framework-1.0.jar) and its dependent jars in the lib folder to the appropriate
 class paths on your system, depending on your build environment.
 
 Alternatively, if your project/workflow is based on Maven, then you can manually install the ussd-framework-*.jar into your local repository, and copy the dependencies listed in the ussd-framework's pom.xml (not in the zip) into your project's pom.xml.
